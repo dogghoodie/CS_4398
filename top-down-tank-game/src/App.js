@@ -1,10 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { Obstacle } from './Obstacles';
 import './App.css';
 
 function App() {
   const canvasRef = useRef(null); // referencing canvas directly
   const [position, setPosition] = useState({ x: 50, y: 50 }); // initial character position
   const characterSize = 50;
+
+  // test object
+  const obstacles = [
+    new Obstacle(300, 200, 100, 100),
+    new Obstacle(700, 600, 200, 100),
+  ];
 
   // deal with user input
   const handleKeyDown = (event) => {
@@ -60,6 +67,11 @@ function App() {
     // add character
     context.fillStyle = '#50fa7b';
     context.fillRect(position.x, position.y, characterSize, characterSize);
+
+    // draw obstacles
+    obstacles.forEach(Obstacle => {
+      Obstacle.draw(context);
+    });
 
     // listener event fo handlekeydown
     window.addEventListener('keydown', handleKeyDown);
