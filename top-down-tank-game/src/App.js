@@ -14,6 +14,10 @@ function App() {
   ];
 
   // deal with user input
+
+  // update to handle diagonal inputs (w+a, w+d, etc)
+  // update to handle SOCD (simultaneous opposite cardinal directions)
+
   const handleKeyDown = (event) => {
     setPosition((prevPosition) => {
 
