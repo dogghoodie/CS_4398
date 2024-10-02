@@ -13,7 +13,7 @@ function App() {
       const newPosition = { ...prevPosition };
       const step = 10; // move speed
       const canvasWidth = 1600;
-      const canvasHeight = 1000;
+      const canvasHeight = 700;
 
       // arrows and wasd
       switch (event.key) {
@@ -76,7 +76,7 @@ function App() {
       <canvas
         id="gameBackground"
         width="1600"
-        height="1000"
+        height="700"
         style={{ backgroundColor: 'black' }}
         ref={canvasRef}
       >
