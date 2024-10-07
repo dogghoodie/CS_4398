@@ -2,70 +2,50 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Player } from './player'; // Import the Player class
 import './App.css';
 
-function App() {
+function App()
+{
   const canvasRef = useRef(null); // Reference the canvas element
   const [player] = useState(new Player(50, 50, 50, 50));
 
-  const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
-  const playerWidth = 50;
-  const playerHeight = 50;
+  //const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
+  //const playerWidth = 50;
+  //const playerHeight = 50;
+
+  const draw = (context) =>
+  {
+    context.clearRect(0,0, 1600, 1000) //redraw the canvas
+    player.draw(context); //then we draw the player
+  };
 
   // Handle keyboard input to move the player
   const handleKeyDown = (event) =>
   {
-    setPosition((prevPosition) =>
+    if(event.key == 'ArrowUp' || event.key == 'w')
     {
-      const newPosition = { ...prevPosition };
-      //const step = 10;
-      //const canvasWidth = 1600;
-      //const canvasHeight = 1000;
+      player.moveForward();
+    }
 
-      //declare a player class 
-      
+    if(event.key == 'ArrowDown' || event.key == 's')
+    {
+      player.moveBackward();
+    }
 
+    if(event.key == 'ArrowLeft' || event.key == 'a')
+    {
+      player.turnLeft();
+    }
 
-      //perhaps IF-ELSE instead? should make things smoother?
-        //if statements should work
-      //is there a way to combine flags? ^+"w", v+"s", <+"a", >+"d"
-      if(event.key == 'ArrowLeft' || event.key == 'a')
-      {
-        player.turnLeft();
-      }
+    if(event.key == 'ArrowRight' || event.key == 'd')
+    {
+      player.turnRight();
+    }
 
-      if(event.key == 'ArrowRight' || event.key == 'd')
-      {
-        player.turnRight();
-      }
-
-
-      /*
-      switch (event.key)
-      {
-        case 'ArrowUp':
-        case 'w':
-          newPosition.y = Math.max(newPosition.y - step, 0);
-          break;
-        case 'ArrowDown':
-        case 's':
-          newPosition.y = Math.min(newPosition.y + step, canvasHeight - playerHeight);
-          break;
-        case 'ArrowLeft':
-        case 'a':
-          newPosition.x = Math.max(newPosition.x - step, 0);
-          break;
-        case 'ArrowRight':
-        case 'd':
-          newPosition.x = Math.min(newPosition.x + step, canvasWidth - playerWidth);
-          break;
-        default:
-          break;
-      }
-
-       */
-
-      return newPosition; // Return updated position
-    });
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    draw(context);
   };
+
+
 
   //Create player instance and update on every render
   useEffect(() =>
@@ -73,16 +53,8 @@ function App() {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    //Clears the canvas, prevents "snaking"
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    //Redraws the background?
-    //context.fillStyle = 'black';
-    //context.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Create a new player instance and draw at the updated position
-    const playerInstance = new Player(position.x, position.y, playerHeight, playerWidth);
-    playerInstance.draw(context);
+    //initial draw
+    draw(context);
 
     // Attach keydown event listener
     window.addEventListener('keydown', handleKeyDown);
@@ -92,7 +64,8 @@ function App() {
     {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [position]); // This runs every time the position changes
+
+  }, [player]); // This runs every time the position changes
 
   return (
     <div className="App">
