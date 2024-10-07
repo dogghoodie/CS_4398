@@ -15,29 +15,41 @@ export class Player
       this.angle_speed = 5; //angle speed
     }
   
+    /*
     //draw the player on the canvas
     draw(context)
     {
-        context.save();
         context.fillStyle = '#50fa7b';
-        context.fillRect(this.x, this.y, this.image_height, this.image_width);
-      
+        context.fillRect(this.x, this.y, this.image_width, this.image_height); // Directly draw without rotation
+    }
+    */
+    
+    
+    
+    draw(context)
+    {
+        context.save(); // Save the current state of the canvas
+
         //figure out how to put our x and y at the "center"
         //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate
         //this.dimension / 2 for both = center of image
         //x and y for their position
-        context.translate(this.image_width / 2, this.image_height / 2);
-      
+        // Move the canvas' origin to the center of the player
+        context.translate(this.x + this.image_width / 2, this.y + this.image_height / 2);
+
         //figure out how to rotate?
         //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/rotate
-        context.rotate(this.angle * Math.PI / 180); //in radians
+        context.rotate((this.angle * Math.PI) / 180); //in radians
+
+        context.fillStyle = '#50fa7b';       
+        
         //once figure out how we translate the image
-        context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        context.fillRect(-this.image_width / 2, -this.image_height / 2, this.image_width, this.image_height);
 
-
-        context.restore();
+        context.restore(); // Restore the canvas state
     }
     
+
     //move the character forward
     moveForward()
     {
@@ -64,14 +76,6 @@ export class Player
     turnRight()
     {
         this.angle -= this.right_turn_speed;
-    }
-
-    //wont be necessary when the above functions are complete
-    //update the player's position
-    setPosition(x, y)
-    {
-        this.x = x;
-        this.y = y;
     }
   }
   

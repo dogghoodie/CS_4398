@@ -5,11 +5,7 @@ import './App.css';
 function App()
 {
   const canvasRef = useRef(null); // Reference the canvas element
-  const [player] = useState(new Player(50, 50, 50, 50));
-
-  //const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
-  //const playerWidth = 50;
-  //const playerHeight = 50;
+  const [player] = useState(new Player(400, 400, 30, 60));
 
   const draw = (context) =>
   {
@@ -40,6 +36,7 @@ function App()
       player.turnRight();
     }
 
+    //redraws the canvase after updating the player's position
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     draw(context);
