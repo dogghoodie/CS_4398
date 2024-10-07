@@ -65,17 +65,17 @@ export class Player
     }
 
     //change the angle left
-    //we have to ADD to turn left
+    //we have to MINUS to turn left
     turnLeft()
     {
-        this.angle += this.left_turn_speed;
+        this.angle -= this.left_turn_speed;
     }
 
     //change the angle right
-    //we have to MINUS to turn right
+    //we have to ADD to turn right
     turnRight()
     {
-        this.angle -= this.right_turn_speed;
+        this.angle += this.right_turn_speed;
     }
   }
   

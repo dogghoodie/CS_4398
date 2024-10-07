@@ -42,8 +42,6 @@ function App()
     draw(context);
   };
 
-
-
   //Create player instance and update on every render
   useEffect(() =>
   {
