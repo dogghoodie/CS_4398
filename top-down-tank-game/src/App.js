@@ -20,6 +20,7 @@ function App() {
       const canvasHeight = 1000;
 
       //perhaps IF-ELSE instead? should make things smoother?
+        //if statements should work
       //is there a way to combine flags? ^+"w", v+"s", <+"a", >+"d"
 
       switch (event.key)
