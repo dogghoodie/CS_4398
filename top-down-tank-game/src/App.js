@@ -6,40 +6,30 @@ function App()
 {
   const canvasRef = useRef(null); // Reference the canvas element
   const [player] = useState(new Player(400, 400, 30, 60));
+  const [keyStates, setKeyStates] = useState({}); // Track key states
 
   const draw = (context) =>
   {
     context.clearRect(0,0, 1600, 1000) //redraw the canvas
     player.draw(context); //then we draw the player
   };
-
-  // Handle keyboard input to move the player
+  
   const handleKeyDown = (event) =>
   {
-    if(event.key == 'ArrowUp' || event.key == 'w')
-    {
-      player.moveForward();
-    }
+    setKeyStates((prevState) =>
+    ({
+      ...prevState,
+      [event.key]: true,
+    }));
+  };
 
-    if(event.key == 'ArrowDown' || event.key == 's')
-    {
-      player.moveBackward();
-    }
-
-    if(event.key == 'ArrowLeft' || event.key == 'a')
-    {
-      player.turnLeft();
-    }
-
-    if(event.key == 'ArrowRight' || event.key == 'd')
-    {
-      player.turnRight();
-    }
-
-    //redraws the canvase after updating the player's position
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    draw(context);
+  const handleKeyUp = (event) =>
+  {
+    setKeyStates((prevState) =>
+    ({
+      ...prevState,
+      [event.key]: false,
+    }));
   };
 
   //Create player instance and update on every render
@@ -48,19 +38,48 @@ function App()
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    //initial draw
-    draw(context);
+    const gameLoop = () =>
+    {
+      //initial draw
+      draw(context);
+
+      if(keyStates['ArrowUp'] || keyStates['w'])
+      {
+        player.moveForward();
+      }
+  
+      if(keyStates['ArrowDown'] || keyStates['s'])
+      {
+        player.moveBackward();
+      }
+  
+      if(keyStates['ArrowLeft'] || keyStates['a'])
+      {
+        player.turnLeft();
+      }
+  
+      if(keyStates['ArrowRight'] || keyStates['d'])
+      {
+        player.turnRight();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
 
     // Attach keydown event listener
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     // Cleanup keydown event listener on component unmount
     return () =>
     {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
 
-  }, [player]); // This runs every time the position changes
+  }, [player, keyStates]); // This runs every time the position changes
 
   return (
     <div className="App">
