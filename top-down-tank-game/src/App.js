@@ -4,6 +4,7 @@ import './App.css';
 
 function App() {
   const canvasRef = useRef(null); // Reference the canvas element
+  const [player] = useState(new Player(50, 50, 50, 50));
 
   const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
   const playerWidth = 50;
@@ -15,14 +16,29 @@ function App() {
     setPosition((prevPosition) =>
     {
       const newPosition = { ...prevPosition };
-      const step = 10;
-      const canvasWidth = 1600;
-      const canvasHeight = 1000;
+      //const step = 10;
+      //const canvasWidth = 1600;
+      //const canvasHeight = 1000;
+
+      //declare a player class 
+      
+
 
       //perhaps IF-ELSE instead? should make things smoother?
         //if statements should work
       //is there a way to combine flags? ^+"w", v+"s", <+"a", >+"d"
+      if(event.key == 'ArrowLeft' || event.key == 'a')
+      {
+        player.turnLeft();
+      }
 
+      if(event.key == 'ArrowRight' || event.key == 'd')
+      {
+        player.turnRight();
+      }
+
+
+      /*
       switch (event.key)
       {
         case 'ArrowUp':
@@ -44,6 +60,8 @@ function App() {
         default:
           break;
       }
+
+       */
 
       return newPosition; // Return updated position
     });
