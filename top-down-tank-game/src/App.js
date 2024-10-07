@@ -1,47 +1,79 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Player } from './Player'; //import from Player.js
-import './App.css';
+import { useState, useEffect, useRef } from 'react';
+import { Player } from './player'; // Import the Player class
 
 function App() {
   const canvasRef = useRef(null);
-  const [player, setPlayer] = useState(null); // Create a player object
 
-  useEffect(() => {
+  const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
+  const playerSize = 50;
+  let playerInstance = null; // Declare player instance outside state
+
+  // Update position based on keypress
+  const handleKeyDown = (event) =>
+  {
+    setPosition((prevPosition) =>
+    {
+      const newPosition = { ...prevPosition };
+      const step = 10;
+      const canvasWidth = 1600;
+      const canvasHeight = 1000;
+
+      switch (event.key) {
+        case 'ArrowUp':
+        case 'w':
+          newPosition.y = Math.max(newPosition.y - step, 0);
+          break;
+        case 'ArrowDown':
+        case 's':
+          newPosition.y = Math.min(newPosition.y + step, canvasHeight - playerSize);
+          break;
+        case 'ArrowLeft':
+        case 'a':
+          newPosition.x = Math.max(newPosition.x - step, 0);
+          break;
+        case 'ArrowRight':
+        case 'd':
+          newPosition.x = Math.min(newPosition.x + step, canvasWidth - playerSize);
+          break;
+        default:
+          break;
+      }
+
+      return newPosition; // Return updated position
+    });
+  };
+
+  useEffect(() =>
+  {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const playerInstance = new Player(50, 50, 50, 50, canvas.width, canvas.height); // Initialize player
+    playerInstance = new Player(position.x, position.y, playerSize);
 
-    setPlayer(playerInstance); // Store player instance in state
-
-    const handleKeyDown = (event) => {
-      playerInstance.move(event.key);
-      setPlayer({ ...playerInstance }); // Force a re-render
-    };
-
-    // Listener for key events
+    // Add event listener for keydown
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, []); // This effect only runs once to attach key listeners
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
     // Clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background
+    // Redraw background
     context.fillStyle = 'black';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw player if it's available
-    if (player) {
-      player.draw(context);
-    }
-  }, [player]);
+    // Update player position and draw
+    playerInstance = new Player(position.x, position.y, playerSize);
+    playerInstance.draw(context);
+
+  }, [position]); // This effect re-runs when the position changes
 
   return (
     <div className="App">
