@@ -6,8 +6,8 @@ export class Player
       this.y = y;
       this.image_height = image_height;
       this.image_width = image_width;
-      //add player angle
-      //add angle speed
+      this.angle = 0; //add player angle
+      this.angle_speed = 5; //add angle speed
     }
   
     //draw the player on the canvas
@@ -21,9 +21,28 @@ export class Player
     }
     
     //move the character forward
+    moveForward()
+    {
+
+    }
+    
     //move the character backward
+    moveBackward()
+    {
+
+    }
+
     //change the angle left
+    turnLeft()
+    {
+
+    }
+
     //change the angle right
+    turnRight()
+    {
+
+    }
 
     //wont be necessary when the above functions are complete
     //update the player's position
