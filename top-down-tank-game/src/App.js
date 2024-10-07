@@ -19,7 +19,11 @@ function App() {
       const canvasWidth = 1600;
       const canvasHeight = 1000;
 
-      switch (event.key) {
+      //perhaps IF-ELSE instead? should make things smoother?
+      //is there a way to combine flags? ^+"w", v+"s", <+"a", >+"d"
+
+      switch (event.key)
+      {
         case 'ArrowUp':
         case 'w':
           newPosition.y = Math.max(newPosition.y - step, 0);
