@@ -40,31 +40,10 @@ function App()
 
     const gameLoop = () =>
     {
-      //initial draw
-      draw(context);
-
-      if(keyStates['ArrowUp'] || keyStates['w'])
-      {
-        player.moveForward();
-      }
-  
-      if(keyStates['ArrowDown'] || keyStates['s'])
-      {
-        player.moveBackward();
-      }
-  
-      if(keyStates['ArrowLeft'] || keyStates['a'])
-      {
-        player.turnLeft();
-      }
-  
-      if(keyStates['ArrowRight'] || keyStates['d'])
-      {
-        player.turnRight();
-      }
-
-      requestAnimationFrame(gameLoop);
-    }
+      draw(context); //initial draw on the canvas
+      player.maange_input(keyStates); //manages the player movement
+      requestAnimationFrame(gameLoop); 
+    };
 
     gameLoop();
 
