@@ -1,74 +1,75 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Player } from './player'; // Import the Player class
 import './App.css';
 
 function App() {
-  const canvasRef = useRef(null); // referencing canvas directly
-  const [position, setPosition] = useState({ x: 50, y: 50 }); // initial character position
-  const characterSize = 50;
+  const canvasRef = useRef(null); // Reference the canvas element
 
-  // deal with user input
-  const handleKeyDown = (event) => {
-    setPosition((prevPosition) => {
+  const [position, setPosition] = useState({ x: 50, y: 50 }); // State to track player position
+  const playerWidth = 50;
+  const playerHeight = 50;
 
+  // Handle keyboard input to move the player
+  const handleKeyDown = (event) =>
+  {
+    setPosition((prevPosition) =>
+    {
       const newPosition = { ...prevPosition };
-      const step = 10; // move speed
+      const step = 10;
       const canvasWidth = 1600;
       const canvasHeight = 1000;
 
-      // arrows and wasd
       switch (event.key) {
         case 'ArrowUp':
         case 'w':
           newPosition.y = Math.max(newPosition.y - step, 0);
           break;
-
         case 'ArrowDown':
         case 's':
-          newPosition.y = Math.min(newPosition.y + step, canvasHeight - characterSize);
+          newPosition.y = Math.min(newPosition.y + step, canvasHeight - playerHeight);
           break;
-
         case 'ArrowLeft':
         case 'a':
           newPosition.x = Math.max(newPosition.x - step, 0);
           break;
-
         case 'ArrowRight':
         case 'd':
-          newPosition.x = Math.min(newPosition.x + step, canvasWidth - characterSize);
+          newPosition.x = Math.min(newPosition.x + step, canvasWidth - playerWidth);
           break;
-
         default:
           break;
       }
 
-      return newPosition;
+      return newPosition; // Return updated position
     });
   };
 
-  // update canvas when the position changes
-  useEffect(() => {
+  //Create player instance and update on every render
+  useEffect(() =>
+  {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    // clear canvas
+    //Clears the canvas, prevents "snaking"
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // redraw backgroundColor
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    //Redraws the background?
+    //context.fillStyle = 'black';
+    //context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // add character
-    context.fillStyle = '#50fa7b';
-    context.fillRect(position.x, position.y, characterSize, characterSize);
+    // Create a new player instance and draw at the updated position
+    const playerInstance = new Player(position.x, position.y, playerHeight, playerWidth);
+    playerInstance.draw(context);
 
-    // listener event fo handlekeydown
+    // Attach keydown event listener
     window.addEventListener('keydown', handleKeyDown);
 
-    // cleanup event listener
-    return () => {
+    // Cleanup keydown event listener on component unmount
+    return () =>
+    {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [position]); // re-run on position change
+  }, [position]); // This runs every time the position changes
 
   return (
     <div className="App">
@@ -79,8 +80,7 @@ function App() {
         height="1000"
         style={{ backgroundColor: 'black' }}
         ref={canvasRef}
-      >
-      </canvas>
+      ></canvas>
     </div>
   );
 }
