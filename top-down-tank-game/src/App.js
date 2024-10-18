@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Player } from './player'; // Import the Player class
-import './App.css';
-import { Obstacle } from './Obstacles';
+import { Player } from './components/player'; // Import the Player class
+import './styles/App.css';
+import { Obstacle } from './components/Obstacles';
 
 function App() {
   const canvasRef = useRef(null); // Reference the canvas element
