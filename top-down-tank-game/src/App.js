@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Player } from './player'; // Import the Player class
 import './App.css';
+import { Obstacle } from './Obstacles';
 
-function App()
-{
+function App() {
   const canvasRef = useRef(null); // Reference the canvas element
   const [player] = useState(new Player(400, 400, 30, 60));
+  const [object1] = useState(new Obstacle(600, 600, 40, 50));
   const [keyStates, setKeyStates] = useState({}); // Track key states
 
-  const draw = (context) =>
-  {
-    context.clearRect(0,0, 1600, 1000) //redraw the canvas
-    player.draw(context); //then we draw the player
+  const draw = (context) => {
+    context.clearRect(0, 0, 1600, 1000) //redraw the canvas
+    player.draw(context); // then we draw the player
+    object1.draw(context); // draw obstacle 1 for testing collison
   };
-  
-  const handleKeyDown = (event) =>
-  {
+
+  const handleKeyDown = (event) => {
     setKeyStates((prevState) =>
     ({
       ...prevState,
@@ -23,8 +23,7 @@ function App()
     }));
   };
 
-  const handleKeyUp = (event) =>
-  {
+  const handleKeyUp = (event) => {
     setKeyStates((prevState) =>
     ({
       ...prevState,
@@ -33,16 +32,14 @@ function App()
   };
 
   //Create player instance and update on every render
-  useEffect(() =>
-  {
+  useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    const gameLoop = () =>
-    {
+    const gameLoop = () => {
       draw(context); //initial draw on the canvas
       player.maange_input(keyStates); //manages the player movement
-      requestAnimationFrame(gameLoop); 
+      requestAnimationFrame(gameLoop);
     };
 
     gameLoop();
@@ -52,8 +49,7 @@ function App()
     window.addEventListener('keyup', handleKeyUp);
 
     // Cleanup keydown event listener on component unmount
-    return () =>
-    {
+    return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
