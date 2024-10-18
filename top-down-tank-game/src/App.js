@@ -1,90 +1,64 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Obstacle } from './Obstacles';
+import React, { useState, useEffect, useRef } from 'react';
+import { Player } from './player'; // Import the Player class
 import './App.css';
 
-function App() {
-  const canvasRef = useRef(null); // referencing canvas directly
-  const [position, setPosition] = useState({ x: 50, y: 50 }); // initial character position
-  const characterSize = 50;
+function App()
+{
+  const canvasRef = useRef(null); // Reference the canvas element
+  const [player] = useState(new Player(400, 400, 30, 60));
+  const [keyStates, setKeyStates] = useState({}); // Track key states
 
-  // test object
-  const obstacles = [
-    new Obstacle(300, 200, 100, 100),
-    new Obstacle(700, 600, 200, 100),
-  ];
-
-  // deal with user input
-
-  // update to handle diagonal inputs (w+a, w+d, etc)
-  // update to handle SOCD (simultaneous opposite cardinal directions)
-
-  const handleKeyDown = (event) => {
-    setPosition((prevPosition) => {
-
-      const newPosition = { ...prevPosition };
-      const step = 10; // move speed
-      const canvasWidth = 1600;
-      const canvasHeight = 1000;
-
-      // arrows and wasd
-      switch (event.key) {
-        case 'ArrowUp':
-        case 'w':
-          newPosition.y = Math.max(newPosition.y - step, 0);
-          break;
-
-        case 'ArrowDown':
-        case 's':
-          newPosition.y = Math.min(newPosition.y + step, canvasHeight - characterSize);
-          break;
-
-        case 'ArrowLeft':
-        case 'a':
-          newPosition.x = Math.max(newPosition.x - step, 0);
-          break;
-
-        case 'ArrowRight':
-        case 'd':
-          newPosition.x = Math.min(newPosition.x + step, canvasWidth - characterSize);
-          break;
-
-        default:
-          break;
-      }
-
-      return newPosition;
-    });
+  const draw = (context) =>
+  {
+    context.clearRect(0,0, 1600, 1000) //redraw the canvas
+    player.draw(context); //then we draw the player
+  };
+  
+  const handleKeyDown = (event) =>
+  {
+    setKeyStates((prevState) =>
+    ({
+      ...prevState,
+      [event.key]: true,
+    }));
   };
 
-  // update canvas when the position changes
-  useEffect(() => {
+  const handleKeyUp = (event) =>
+  {
+    setKeyStates((prevState) =>
+    ({
+      ...prevState,
+      [event.key]: false,
+    }));
+  };
+
+  //Create player instance and update on every render
+  useEffect(() =>
+  {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    // clear canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // redraw backgroundColor
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    // add character
-    context.fillStyle = '#50fa7b';
-    context.fillRect(position.x, position.y, characterSize, characterSize);
-
-    // draw obstacles
-    obstacles.forEach(Obstacle => {
-      Obstacle.draw(context);
-    });
-
-    // listener event fo handlekeydown
-    window.addEventListener('keydown', handleKeyDown);
-
-    // cleanup event listener
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+    const gameLoop = () =>
+    {
+      draw(context); //initial draw on the canvas
+      player.maange_input(keyStates); //manages the player movement
+      requestAnimationFrame(gameLoop); 
     };
-  }, [position]); // re-run on position change
+
+    gameLoop();
+
+    // Attach keydown event listener
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    // Cleanup keydown event listener on component unmount
+    return () =>
+    {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+
+  }, [player, keyStates]); // This runs every time the position changes
 
   return (
     <div className="App">
@@ -95,8 +69,7 @@ function App() {
         height="1000"
         style={{ backgroundColor: 'black' }}
         ref={canvasRef}
-      >
-      </canvas>
+      ></canvas>
     </div>
   );
 }
