@@ -10,7 +10,7 @@ export class CollisionChecker {
     for (const obstacle of this.obstacles) {
       if (
         player.x < obstacle.x + obstacle.width &&
-        player.y < obstacle.y + obstacle.width &&
+        player.y < obstacle.y + obstacle.height &&
         player.x + player.width > obstacle.x &&
         player.y + player.height > obstacle.y
       ) {
