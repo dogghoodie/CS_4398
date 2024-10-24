@@ -40,7 +40,7 @@ app.get("/api/getUsers" , async (req, res) => {
         console.log(result)
         res.json({"users": result});
     }catch(e){
-        res.status(500).json({error: "e.message"});
+        res.status(500).json({error: e.message});
     }
 });
 

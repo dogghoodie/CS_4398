@@ -2,12 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Player } from './player'; // Import the Player class
 import './App.css';
 import { Obstacle } from './Obstacles';
+import axios from 'axios'
 
 function App() {
   const canvasRef = useRef(null); // Reference the canvas element
   const [player] = useState(new Player(400, 400, 30, 60));
   const [object1] = useState(new Obstacle(600, 600, 40, 50));
   const [keyStates, setKeyStates] = useState({}); // Track key states
+
+  const [users, setUsers] = useState([]);
 
   const draw = (context) => {
     context.clearRect(0, 0, 1600, 1000) //redraw the canvas
@@ -56,9 +59,20 @@ function App() {
 
   }, [player, keyStates]); // This runs every time the position changes
 
+  const getUsers = async() => {
+      const result = await axios.get('http://localhost:3001/api/getUsers');
+      setUsers(result);
+  }
+  
+  console.log(users)
+
   return (
     <div className="App">
       <h1 style={{ color: '#6272a4' }}>Game Hud</h1>
+      <button onClick={() => getUsers()}>get user</button>
+      {users.map(user => {
+        <div>{user.username}{user.password}</div>
+      })}
       <canvas
         id="gameBackground"
         width="1600"
