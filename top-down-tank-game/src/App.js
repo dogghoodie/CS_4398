@@ -9,8 +9,11 @@ function App() {
   const [player] = useState(new Player(400, 400, 30, 60));
   const [object1] = useState(new Obstacle(600, 600, 40, 50));
   const [keyStates, setKeyStates] = useState({}); // Track key states
-
-  const [users, setUsers] = useState([]);
+  
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [scores, setScores] = useState([]);
 
   const draw = (context) => {
     context.clearRect(0, 0, 1600, 1000) //redraw the canvas
@@ -59,20 +62,22 @@ function App() {
 
   }, [player, keyStates]); // This runs every time the position changes
 
-  const getUsers = async() => {
-      const result = await axios.get('http://localhost:3001/api/getUsers');
-      setUsers(result);
+  const getScores = async() => {
+      const result = await axios.get('http://localhost:3001/test');
+      console.log(result)
+      setScores(result.data);
   }
   
-  console.log(users)
-
+  console.log(scores)
+  
   return (
     <div className="App">
       <h1 style={{ color: '#6272a4' }}>Game Hud</h1>
-      <button onClick={() => getUsers()}>get user</button>
-      {users.map(user => {
-        <div>{user.username}{user.password}</div>
-      })}
+       {/* Button to get scores */}
+      <button onClick={() => getScores()}>Get Scores</button> 
+       {/* Button to toggle score visibility only shows when button is pressed. When button pressed again the scores are hidden*/}
+      <button onClick={() => setIsOpen(!isOpen)}>show scores</button>
+      {isOpen && <h1>{scores.playerName} {scores.score}</h1>}
       <canvas
         id="gameBackground"
         width="1600"

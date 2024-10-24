@@ -50,3 +50,8 @@ canvas {
     transform: rotate(360deg);
   }
 }
+
+.data{
+  z-index: 20px;
+  color: white;
+}
