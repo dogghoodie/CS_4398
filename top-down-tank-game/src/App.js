@@ -63,9 +63,9 @@ function App() {
   }, [player, keyStates]); // This runs every time the position changes
 
   const getScores = async() => {
-      const result = await axios.get('http://localhost:3001/test');
+      const result = await axios.get('http://localhost:3001/api/getScores');
       console.log(result)
-      setScores(result.data);
+      setScores(result.data.scores);
   }
   
   console.log(scores)
@@ -77,7 +77,9 @@ function App() {
       <button onClick={() => getScores()}>Get Scores</button> 
        {/* Button to toggle score visibility only shows when button is pressed. When button pressed again the scores are hidden*/}
       <button onClick={() => setIsOpen(!isOpen)}>show scores</button>
-      {isOpen && <h1>{scores.playerName} {scores.score}</h1>}
+      {isOpen && scores.map((scores, index) => (
+        <h1 key={index}>{scores.playerName} {scores.score}</h1>
+      ))}
       <canvas
         id="gameBackground"
         width="1600"
