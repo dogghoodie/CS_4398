@@ -76,6 +76,7 @@ const App = () => {
     function animate() {
       window.requestAnimationFrame(animate);
 
+
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -84,7 +85,6 @@ const App = () => {
       turret.update(c, player.position, mouse)
       reticle.update(c, mouse)
       reload.update(c, mouse)
-      
 
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const projectile = projectiles[i]
@@ -196,6 +196,7 @@ const App = () => {
   }, [])
 
   return <canvas ref={canvasRef} />;
+
 }
 
 export default App;
