@@ -1,87 +1,202 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Player } from './player'; // Import the Player class
-import './App.css';
-import { Obstacle } from './Obstacles';
-import axios from 'axios'
+import React, { useRef, useEffect } from 'react';
+import { Player } from './player.js';
+import { Turret } from './turret.js';
+import { Reticle } from './reticle.js';
+import { Projectile } from './projectile.js';
+import { Reload } from './reload.js';
 
-function App() {
-  const canvasRef = useRef(null); // Reference the canvas element
-  const [player] = useState(new Player(400, 400, 30, 60));
-  const [object1] = useState(new Obstacle(600, 600, 40, 50));
-  const [keyStates, setKeyStates] = useState({}); // Track key states
+const App = () => {
+  const canvasRef = useRef(null); // Create a reference to the canvas
+  let mouse = { x: 0, y: 0 }; // Track mouse position without re-rendering
 
-  const [users, setUsers] = useState([]);
+  // Define turret offset
+  const turretOffset = { x: 50, y: 0 }; // 50px to the right of the player
 
-  const draw = (context) => {
-    context.clearRect(0, 0, 1600, 1000) //redraw the canvas
-    player.draw(context); // then we draw the player
-    object1.draw(context); // draw obstacle 1 for testing collison
-  };
+  // Lock flag for shooting
+  let canShoot = true; // Allow shooting by default
 
-  const handleKeyDown = (event) => {
-    setKeyStates((prevState) =>
-    ({
-      ...prevState,
-      [event.key]: true,
-    }));
-  };
-
-  const handleKeyUp = (event) => {
-    setKeyStates((prevState) =>
-    ({
-      ...prevState,
-      [event.key]: false,
-    }));
-  };
-
-  //Create player instance and update on every render
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
+    const canvas = canvasRef.current
+    const c = canvas.getContext('2d')
 
-    const gameLoop = () => {
-      draw(context); //initial draw on the canvas
-      player.maange_input(keyStates); //manages the player movement
-      requestAnimationFrame(gameLoop);
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+
+    // object declarations
+    const player = new Player({
+      position: { x: canvas.width / 2 - 50, y: canvas.height / 2 - 50 },
+      velocity: { x: 0, y: 0 },
+    })
+
+    const turret = new Turret({
+      position: {
+        x: player.position.x + turretOffset.x,  // 50px to the right of the player
+        y: player.position.y + turretOffset.y,  // same vertical position as player
+      },
+    });
+
+    const reticle = new Reticle({
+      position: {
+        x: mouse.x,
+        y: mouse.y,
+      }
+    })
+
+    const reload = new Reload({
+      position: {
+        x: mouse.x,
+        y: mouse.y,
+      }
+    })
+
+    const keys = {
+      w: { pressed: false },
+      s: { pressed: false },
+      a: { pressed: false },
+      d: { pressed: false },
+      space: { pressed: false },
+    }
+
+    // Handle mouse position globally
+    const handleMouseMove = (event) => {
+      mouse = {
+        x: event.clientX,
+        y: event.clientY,
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)    
+
+    const SPEED = 2.0
+    const ROTATIONAL_SPEED = 0.03
+    const FRICTION = 0.01
+    const PROJECTILE_SPEED = 250
+    const projectiles = []
+
+    function animate() {
+      window.requestAnimationFrame(animate);
+
+
+      // Clear the canvas on each frame to avoid drawing over the previous frames
+      c.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Update player and turret
+      player.update(c)
+      turret.update(c, player.position, mouse)
+      reticle.update(c, mouse)
+      reload.update(c, mouse)
+
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i]
+        projectile.update(c)
+
+        // Remove projectiles that are off-screen
+        if (projectile.position.x + 10 < 0 || projectile.position.x - 10 > canvas.width ||
+            projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height) {
+          projectiles.splice(i, 1)
+        }
+      }
+
+      // Handle movement based on key presses
+      player.velocity.x = 0
+      player.velocity.y = 0
+
+      if (keys.w.pressed)
+      {
+        player.velocity.x = Math.cos(player.rotation) * SPEED
+        player.velocity.y = Math.sin(player.rotation) * SPEED
+      }
+      
+      else if (!keys.w.pressed)
+      {
+        player.velocity.x *= FRICTION
+        player.velocity.y *= FRICTION
+      }
+
+      if (keys.s.pressed)
+      {
+        player.velocity.x = -Math.cos(player.rotation)
+        player.velocity.y = -Math.sin(player.rotation)
+      }
+
+      if (keys.d.pressed) player.rotation += ROTATIONAL_SPEED
+      if (keys.a.pressed) player.rotation -= ROTATIONAL_SPEED
+
+      if (keys.space.pressed && !canShoot)
+      {
+        reload.eject_chamber = true
+      }
+
+      else if(!reload.load_chamber && reload.eject_chamber)
+      {
+        reload.load_chamber = true
+        reload.load_progress = 0
+      }
+
+      /*
+      if (keys.space.pressed && reload.eject_chamber)
+      {
+        reload.load_chamber = true
+      }
+      */
     };
 
-    gameLoop();
+    animate();
 
-    // Attach keydown event listener
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Handle key events
+    window.addEventListener('keydown', (event) => {
+      switch (event.code) {
+        case 'KeyW': keys.w.pressed = true; break
+        case 'KeyS': keys.s.pressed = true; break
+        case 'KeyA': keys.a.pressed = true; break
+        case 'KeyD': keys.d.pressed = true; break
+        case 'Space' : keys.space.pressed = true; break
+        default: break
+      }
+    });
 
-    // Cleanup keydown event listener on component unmount
+    window.addEventListener('keyup', (event) => {
+      switch (event.code) {
+        case 'KeyW': keys.w.pressed = false; break
+        case 'KeyS': keys.s.pressed = false; break
+        case 'KeyA': keys.a.pressed = false; break
+        case 'KeyD': keys.d.pressed = false; break
+        case 'Space' : keys.space.pressed = false; break
+        default: break
+      }
+    });
+
+    window.addEventListener('mousedown', (event) => {
+      if (event.button === 0 && canShoot) // Left mouse button clicked and can shoot
+        {
+        // Fire a projectile if allowed to shoot
+        projectiles.push(
+          new Projectile({
+            position: {
+              x: turret.position.x + Math.cos(turret.rotation) * 1,
+              y: turret.position.y + Math.sin(turret.rotation) * 1,
+            },
+            velocity: {
+              x: Math.cos(turret.rotation) * PROJECTILE_SPEED,
+              y: Math.sin(turret.rotation) * PROJECTILE_SPEED,
+            }
+          })
+        )
+
+        // Lock shooting until the condition is met (e.g., projectile leaves the screen)
+        canShoot = false
+        //reload.eject_chamber = true
+      }
+    });
+
+    // Cleanup mouse event listener
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
+      window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [])
 
-  }, [player, keyStates]); // This runs every time the position changes
+  return <canvas ref={canvasRef} />;
 
-  const getUsers = async() => {
-      const result = await axios.get('http://localhost:3001/api/getUsers');
-      setUsers(result);
-  }
-  
-  console.log(users)
-
-  return (
-    <div className="App">
-      <h1 style={{ color: '#6272a4' }}>Game Hud</h1>
-      <button onClick={() => getUsers()}>get user</button>
-      {users.map(user => {
-        <div>{user.username}{user.password}</div>
-      })}
-      <canvas
-        id="gameBackground"
-        width="1600"
-        height="1000"
-        style={{ backgroundColor: 'black' }}
-        ref={canvasRef}
-      ></canvas>
-    </div>
-  );
 }
 
 export default App;
