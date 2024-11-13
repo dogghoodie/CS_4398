@@ -12,22 +12,23 @@ export class Reload
   {
     //red bar near reticle
     c.save()
-    
+
+    //draws a red bar when you eject the gun
+    if(this.eject_chamber)
+      {
+        c.fillStyle = 'red'
+        c.fillRect(mouse.x + 30, mouse.y - 20, 70, 20)
+      }
+        
     //draw a green bar loading up over the red bar
     if(this.load_chamber)
     {
       c.fillStyle = 'green'
-      const greenWidth = (this.load_progress / 100) * 70; // Scale green bar width
-      c.fillRect(mouse.x + 30, mouse.y - 20, greenWidth, 20);
+      const green_width = (this.load_progress / 100) * 70;    // Scale green bar width
+      c.fillRect(mouse.x + 30, mouse.y - 20, green_width, 20) //draws bar based on green_width
+      //c.fillRect(mouse.x + 30, mouse.y - 40, 70, 20)
     }
-    
-    //draws a red bar when you eject the gun
-    if(this.eject_chamber)
-    {
-      c.fillStyle = 'red'
-      c.fillRect(mouse.x + 30, mouse.y - 20, 70, 20)
-    }
-
+      
     c.restore()
   }
 
