@@ -9,11 +9,7 @@ function App() {
   const [player] = useState(new Player(400, 400, 30, 60));
   const [object1] = useState(new Obstacle(600, 600, 40, 50));
   const [keyStates, setKeyStates] = useState({}); // Track key states
-  
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [playerName, setPlayerName] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [scores, setScores] = useState([]);
+
 
   const draw = (context) => {
     context.clearRect(0, 0, 1600, 1000) //redraw the canvas
@@ -62,24 +58,13 @@ function App() {
 
   }, [player, keyStates]); // This runs every time the position changes
 
-  const getScores = async() => {
-      const result = await axios.get('http://localhost:3001/api/getScores');
-      console.log(result)
-      setScores(result.data.scores);
-  }
+  // This runs every time the position changes
+
   
-  console.log(scores)
   
   return (
     <div className="App">
       <h1 style={{ color: '#6272a4' }}>Game Hud</h1>
-       {/* Button to get scores */}
-      <button onClick={() => getScores()}>Get Scores</button> 
-       {/* Button to toggle score visibility only shows when button is pressed. When button pressed again the scores are hidden*/}
-      <button onClick={() => setIsOpen(!isOpen)}>show scores</button>
-      {isOpen && scores.map((scores, index) => (
-        <h1 key={index}>{scores.playerName} {scores.score}</h1>
-      ))}
       <canvas
         id="gameBackground"
         width="1600"
@@ -90,5 +75,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
