@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react'
 import './Leaderboard.css';
 import axios from 'axios'
 
+//Need to prompt the player an input with username and the score will automatically be placed in the score field then you press the submit button which will send a post request to the database
+
 const Leaderboard = () => {
 
     const [scores, setScores] = useState([]);
 
-
+    //Retrieves scores
     useEffect(() => {
         const fetchScores = async () => {
             const result = await axios.get('http://localhost:3001/api/getScores');
