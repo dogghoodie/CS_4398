@@ -4,8 +4,8 @@ export class Reload
   {
     this.position = position
     this.load_progress = 0
-    this.eject_chamber = false
-    this.load_chamber = false
+    this.reloadStage = 0 // 0: not reloading, 1: open chamber, 2: loading chamber
+    this.canShoot = true
   }
 
   draw(c, mouse)
@@ -14,19 +14,20 @@ export class Reload
     c.save()
 
     //draws a red bar when you eject the gun
-    if(this.eject_chamber)
+    if(this.reloadStage === 1 || this.reloadStage === 2)
       {
         c.fillStyle = 'red'
         c.fillRect(mouse.x + 30, mouse.y - 20, 70, 20)
+        //c.fillRect(20, 500, 50, 50)       // Gun Loading Animation
       }
         
     //draw a green bar loading up over the red bar
-    if(this.load_chamber)
+    if(this.reloadStage === 2)
     {
       c.fillStyle = 'green'
-      const green_width = (this.load_progress / 100) * 70;    // Scale green bar width
+      const green_width = (this.load_progress / 100) * 70    // Scale green bar width
       c.fillRect(mouse.x + 30, mouse.y - 20, green_width, 20) //draws bar based on green_width
-      //c.fillRect(mouse.x + 30, mouse.y - 40, 70, 20)
+      //c.fillRect(70, 500, 50, 50)         // Gun Loading Animation
     }
       
     c.restore()
@@ -36,11 +37,13 @@ export class Reload
   {
     if (this.load_progress)
     {
-      this.load_progress += 1; // Adjust the speed by changing the increment value
+      this.load_progress += 1             // Adjust the speed by changing the increment value
       if (this.load_progress >= 100)
       {
-        this.load_progress = 0; // Reset for next reload cycle
-        //this.load_chamber = false; // End load state
+        this.canShoot = true
+        this.load_progress = 0            // Reset for next reload cycle
+        //this.load_chamber = false         // End load state
+        //this.eject_chamber = false        // Chamber is closed
       }
     }
 

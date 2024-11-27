@@ -13,8 +13,20 @@ const App = () => {
   const turretOffset = { x: 50, y: 0 }; // 50px to the right of the player
 
   // Lock flag for shooting
-  let canShoot = true
-  let reloadStage = 0 // 0: not reloading, 1: open chamber, 2: load chamber
+  // let canShoot = true
+  // let reloadStage = 0 // 0: not reloading, 1: open chamber, 2: load chamber
+
+  /*
+  //enumerations object
+  const ReloadState = Object.freeze({
+    NOT_LOADED: 'not_loaded',
+    EJECTED: 'ejected',
+    RELOADING: 'reloading',
+    ACTIVE_RELOADING: 'active_reload',
+  })
+  */
+
+
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -138,36 +150,24 @@ const App = () => {
       if (keys.d.pressed) player.rotation += ROTATIONAL_SPEED
       if (keys.a.pressed) player.rotation -= ROTATIONAL_SPEED
 
-
-
-    if (keys.space.pressed)
-    {
-      if (reloadStage === 0 && !canShoot)
+      if (keys.space.pressed)
       {
-        // First spacebar press: Open the chamber
-        reload.eject_chamber = true
-        reloadStage = 1               // Move to the next reload stage
-        keys.space.pressed = false
+        if (reload.reloadStage === 1)
+        {
+          // First spacebar press: Open the chamber
+          reload.reloadStage = 2        // Move to the next reload stage
+          keys.space.pressed = false    // Stop from holding space bar
+        }
+
+        else if (reload.reloadStage === 2)
+        {
+          reload.load_progress = 1      // Start load progress
+          //reload.reloadStage = 0        // Finalize reload
+          reload.canShoot = true
+          keys.space.pressed = false    // Stop from holding space bar
+        }
       }
-      
-      else if (reloadStage === 1)
-      {
-        // Second spacebar press: Load the chamber
-        reload.eject_chamber = true  // Reset eject chamber
-        reload.load_chamber = true    
-        reload.load_progress = 1    // Start load progress
-        reloadStage = 2               // Finalize reload
-      }
-    }
-    
-    // After loading is complete, reset the reload state
-    if (reload.load_chamber && reload.load_progress >= 100)
-    {
-        reload.load_chamber = false  // Complete reload
-        canShoot = true              // Allow shooting again
-        reloadStage = 0              // Reset reload stage
-    }
-    
+
     };
 
     animate();
@@ -200,7 +200,7 @@ const App = () => {
     });
 
     window.addEventListener('mousedown', (event) => {
-      if (event.button === 0 && canShoot) // Left mouse button clicked and can shoot
+      if (event.button === 0 && reload.canShoot) // Left mouse button clicked and can shoot
       {
         // Fire a projectile if allowed to shoot
         projectiles.push(
@@ -218,7 +218,8 @@ const App = () => {
         )
 
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
-        canShoot = false
+        reload.canShoot = false
+        reload.reloadStage = 1
       }
     });
 
