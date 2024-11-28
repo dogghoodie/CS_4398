@@ -8,7 +8,7 @@ import Leaderboard from './Leaderboard';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Leaderboard/>
+    < App/>
   </React.StrictMode>
 );
 

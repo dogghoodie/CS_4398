@@ -36,8 +36,6 @@ start();
 
 
 
-
-
 app.get("/test", (req, res) => {
     res.json(score);
 });

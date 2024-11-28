@@ -8,6 +8,45 @@
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="Web site created using create-react-app" />
   <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <script src="../src/Leaderboard.js" type="module"></script>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+    }
+    .leaderboard-container {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+    .back-button {
+        margin-top: 20px;
+        display: block;
+        text-align: center;
+    }
+</style>
   <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -39,7 +78,54 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
   <button id="Back">Back</button>
-  <script src="../src/renderer.js"></script>
+  <div class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            <!-- Sample static data -->
+      
+        </tbody>
+    </table>
+</div>
+
+<script>
+   const fetchScores = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/getScores');
+                const data = await response.json();
+                populateTable(data.scores);
+            } catch (error) {
+                console.error('Error fetching scores:', error);
+            }
+        };
+
+        // Function to populate the table with scores
+        const populateTable = (scores) => {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = ''; // Clear existing content
+
+            scores.forEach((player, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${player.playerName}</td>
+                    <td>${player.score}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        // Call the fetchScores function when the page loads
+        window.onload = fetchScores;
+</script>
+  
 </body>
 
 </html>

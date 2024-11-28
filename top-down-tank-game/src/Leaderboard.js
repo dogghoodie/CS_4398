@@ -48,3 +48,15 @@ const Leaderboard = () => {
 }
 
 export default Leaderboard
+
+const renderLeaderboard = () => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+        React.render(<Leaderboard />, rootElement);
+    } else {
+        console.error('Root element not found');
+    }
+};
+
+// Call the render function when the script loads
+window.onload = renderLeaderboard;
