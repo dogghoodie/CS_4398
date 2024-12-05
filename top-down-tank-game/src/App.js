@@ -27,6 +27,8 @@ const App = () => {
     escape: { pressed: false },
   });
   const pausedRef = useRef(paused);
+  const scoreRef = useRef(0); // To keep track of the score
+  const scoreIntervalRef = useRef(null); 
 
   // Lock flag for shooting
   // let canShoot = true
@@ -52,7 +54,7 @@ const App = () => {
     const c = canvas.getContext('2d')
 
     canvas.width = window.innerWidth - 8
-    canvas.height = window.innerHeight - (window.innerHeight/12)
+    canvas.height = window.innerHeight - 8
 
     //=======================
     // OBJECT DECLARATION
@@ -94,6 +96,27 @@ const App = () => {
       }
     }
     window.addEventListener('mousemove', handleMouseMove)    
+
+    //=======================
+    // SCORE TIMER FUNCTIONS
+    //=======================
+    const startScoreTimer = () => {
+      if (scoreIntervalRef.current !== null) return;
+
+      scoreIntervalRef.current = setInterval(() => {
+        scoreRef.current += 50; // 50 points
+      }, 10000); // 10000 ms = 10 seconds
+    };
+    const stopScoreTimer = () => {
+      if (scoreIntervalRef.current !== null) {
+        clearInterval(scoreIntervalRef.current);
+        scoreIntervalRef.current = null;
+      }
+    };
+    // Start the score timer when the game starts
+    if (!paused) {
+      startScoreTimer();
+    }
 
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
@@ -179,6 +202,20 @@ const App = () => {
         }
       }
 
+      //=======================
+      // DRAW SCORE ON CANVAS
+      //=======================
+      c.font = '48px Arial';
+      c.textBaseline = 'top';
+
+      c.fillStyle = 'white';
+      const scoreText = 'Score: ';
+      c.fillText(scoreText, 20, 20);
+
+      // Measure the width of "Score: " to position the score number
+      const textWidth = c.measureText(scoreText).width;
+      c.fillStyle = 'lime';
+      c.fillText(scoreRef.current.toString(), 20 + textWidth, 20);
     };
 
     animate();
@@ -264,6 +301,9 @@ const App = () => {
         keys.a.pressed = false;
         keys.d.pressed = false;
         keys.space.pressed = false;
+        stopScoreTimer();
+      } else {
+        startScoreTimer();
       }
     };
 
@@ -275,6 +315,7 @@ const App = () => {
       window.removeEventListener('keyup', handleKeyUp);
       ipcRenderer.removeAllListeners('toggle-pause');
       window.cancelAnimationFrame(animationIdRef.current);
+      stopScoreTimer();
     };
   }, []);
 
