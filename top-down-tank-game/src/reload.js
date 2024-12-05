@@ -25,7 +25,7 @@ export class Reload
       }
     if(this.reloadStage === 2)
       {
-        c.fillStyle = 'green'
+        c.fillStyle = 'lime'
         c.fillRect(mouse.x + 30, mouse.y - 16, 70, 12)
       }
       

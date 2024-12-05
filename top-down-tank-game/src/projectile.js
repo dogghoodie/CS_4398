@@ -8,8 +8,8 @@ export class Projectile
 
     draw(c)
     {
-        c.fillStyle = 'green';
-        c.fillRect(this.position.x, this.position.y, 20, 20); // Draw the red square (player)
+        c.fillStyle = 'lime';
+        c.fillRect(this.position.x, this.position.y, 20, 20); // Draw the lime square (player)
     }
 
     update(c)
