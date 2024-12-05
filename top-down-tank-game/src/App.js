@@ -1,16 +1,32 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
 import { Turret } from './turret.js';
 import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
+const { ipcRenderer } = window.require('electron');
 
 const App = () => {
   const canvasRef = useRef(null); // Create a reference to the canvas
-  let mouse = { x: 0, y: 0 }; // Track mouse position without re-rendering
+  const [paused, setPaused] = useState(false); // State to track if the game paused
 
-  // Define turret offset
-  const turretOffset = { x: 50, y: 0 }; // 50px to the right of the player
+  // Refs to store game objects persistently
+  const playerRef = useRef(null);
+  const turretRef = useRef(null);
+  const reticleRef = useRef(null);
+  const reloadRef = useRef(null);
+  const projectilesRef = useRef([]);
+  const animationIdRef = useRef(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const keysRef = useRef({
+    w: { pressed: false },
+    s: { pressed: false },
+    a: { pressed: false },
+    d: { pressed: false },
+    space: { pressed: false },
+    escape: { pressed: false },
+  });
+  const pausedRef = useRef(paused);
 
   // Lock flag for shooting
   // let canShoot = true
@@ -26,6 +42,9 @@ const App = () => {
   })
   */
 
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
 
   useEffect(() => {
@@ -38,77 +57,72 @@ const App = () => {
     //=======================
     // OBJECT DECLARATION
     //=======================
-    const player = new Player({
+    playerRef.current = new Player({
       position: { x: canvas.width / 2 - 50, y: canvas.height / 2 - 50 },
       velocity: { x: 0, y: 0 },
     })
 
-    const turret = new Turret({
+    turretRef.current = new Turret({
       position: {
-        x: player.position.x + turretOffset.x,  // 50px to the right of the player
-        y: player.position.y + turretOffset.y,  // same vertical position as player
+        x: playerRef.current.position.x + 50,  // 50px to the right of the player
+        y: playerRef.current.position.y,  // same vertical position as player
       },
     });
 
-    const reticle = new Reticle({
+    reticleRef.current = new Reticle({
       position: {
-        x: mouse.x,
-        y: mouse.y,
+        x: mouseRef.current.x,
+        y: mouseRef.current.y,
       }
     })
 
-    const reload = new Reload({
+    reloadRef.current = new Reload({
       position: {
-        x: mouse.x,
-        y: mouse.y,
+        x: mouseRef.current.x,
+        y: mouseRef.current.y,
       }
     })
-
-    const keys = {
-      w: { pressed: false },
-      s: { pressed: false },
-      a: { pressed: false },
-      d: { pressed: false },
-      space: { pressed: false },
-    }
-
-    // Handle mouse position globally
-    const handleMouseMove = (event) => {
-      mouse = {
-        x: event.clientX,
-        y: event.clientY,
-      }
-    }
-
 
     //=======================
     // LISTENERS
     //=======================
+    const handleMouseMove = (event) => {
+      if (pausedRef.current) return;
+      mouseRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      }
+    }
     window.addEventListener('mousemove', handleMouseMove)    
 
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
     const FRICTION = 0.01
     const PROJECTILE_SPEED = 250
-    const projectiles = []
-
 
     //=======================
     // GAME LOOP
     //=======================
-    function animate()
-    {
-      window.requestAnimationFrame(animate);
+    let animationId;
+
+    const  animate = () => {
+      animationIdRef.current = window.requestAnimationFrame(animate);
+
+      if (paused) {
+        // If the game is paused, do not update the game state
+        return;
+      }
 
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
 
       // Object Animations
-      player.update(c)
-      turret.update(c, player.position, mouse)
-      reticle.update(c, mouse)
-      reload.update(c, mouse)
+      playerRef.current.update(c)
+      turretRef.current.update(c, playerRef.current.position, mouseRef.current)
+      reticleRef.current.update(c, mouseRef.current)
+      reloadRef.current.update(c, mouseRef.current)
 
+      const projectiles = projectilesRef.current;
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const projectile = projectiles[i]
         projectile.update(c)
@@ -122,48 +136,45 @@ const App = () => {
       }
 
       // Handle movement based on key presses
-      player.velocity.x = 0
-      player.velocity.y = 0
-
+      const keys = keysRef.current;
+      playerRef.current.velocity.x = 0
+      playerRef.current.velocity.y = 0
 
       //=======================
       // USER INPUT
       //=======================
       if (keys.w.pressed)
       {
-        player.velocity.x = Math.cos(player.rotation) * SPEED
-        player.velocity.y = Math.sin(player.rotation) * SPEED
-      }
-      
-      else if (!keys.w.pressed)
-      {
-        player.velocity.x *= FRICTION
-        player.velocity.y *= FRICTION
+        playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
+        playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
+      } else {
+        playerRef.current.velocity.x *= FRICTION
+        playerRef.current.velocity.y *= FRICTION
       }
 
       if (keys.s.pressed)
       {
-        player.velocity.x = -Math.cos(player.rotation)
-        player.velocity.y = -Math.sin(player.rotation)
+        playerRef.current.velocity.x = -Math.cos(playerRef.current.rotation)
+        playerRef.current.velocity.y = -Math.sin(playerRef.current.rotation)
       }
 
-      if (keys.d.pressed) player.rotation += ROTATIONAL_SPEED
-      if (keys.a.pressed) player.rotation -= ROTATIONAL_SPEED
+      if (keys.d.pressed) playerRef.current.rotation += ROTATIONAL_SPEED
+      if (keys.a.pressed) playerRef.current.rotation -= ROTATIONAL_SPEED
 
       if (keys.space.pressed)
       {
-        if (reload.reloadStage === 1)
+        if (reloadRef.current.reloadStage === 1)
         {
           // First spacebar press: Open the chamber
-          reload.reloadStage = 2        // Move to the next reload stage
+          reloadRef.current.reloadStage = 2        // Move to the next reload stage
           keys.space.pressed = false    // Stop from holding space bar
         }
 
-        else if (reload.reloadStage === 2)
+        else if (reloadRef.current.reloadStage === 2)
         {
-          reload.load_progress = 1      // Start load progress
+          reloadRef.current.load_progress = 1      // Start load progress
           //reload.reloadStage = 0        // Finalize reload
-          reload.canShoot = true
+          reloadRef.current.canShoot = true
           keys.space.pressed = false    // Stop from holding space bar
         }
       }
@@ -175,62 +186,148 @@ const App = () => {
     //=======================
     // KEY EVENT LISTNERS
     //=======================
-    window.addEventListener('keydown', (event) => {
-      switch (event.code)
-      {
-        case 'KeyW': keys.w.pressed = true; break
-        case 'KeyS': keys.s.pressed = true; break
-        case 'KeyA': keys.a.pressed = true; break
-        case 'KeyD': keys.d.pressed = true; break
-        case 'Space' : keys.space.pressed = true; break
-        default: break
+    const handleKeyDown = (event) => {
+      if (event.code === 'Escape') {
+        togglePause();
+        return;
       }
-    });
-
-    window.addEventListener('keyup', (event) => {
-      switch (event.code)
-      {
-        case 'KeyW': keys.w.pressed = false; break
-        case 'KeyS': keys.s.pressed = false; break
-        case 'KeyA': keys.a.pressed = false; break
-        case 'KeyD': keys.d.pressed = false; break
-        case 'Space' : keys.space.pressed = false; break
-        default: break
+      if (pausedRef.current) return; // Ignore other keys when paused
+      const keys = keysRef.current;
+      switch (event.code) {
+        case 'KeyW': keys.w.pressed = true; break;
+        case 'KeyS': keys.s.pressed = true; break;
+        case 'KeyA': keys.a.pressed = true; break;
+        case 'KeyD': keys.d.pressed = true; break;
+        case 'Space': keys.space.pressed = true; break;
+        default: break;
       }
-    });
+    };
 
-    window.addEventListener('mousedown', (event) => {
-      if (event.button === 0 && reload.canShoot) // Left mouse button clicked and can shoot
+    const handleKeyUp = (event) => {
+      if (event.code === 'Escape') return;
+      if (pausedRef.current) return; // Ignore other keys when paused
+      const keys = keysRef.current;
+      switch (event.code) {
+        case 'KeyW': keys.w.pressed = false; break;
+        case 'KeyS': keys.s.pressed = false; break;
+        case 'KeyA': keys.a.pressed = false; break;
+        case 'KeyD': keys.d.pressed = false; break;
+        case 'Space': keys.space.pressed = false; break;
+        default: break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    const handleMouseDown = (event) => {
+      if (pausedRef.current) return;
+      if (event.button === 0 && reloadRef.current.canShoot) // Left mouse button clicked and can shoot
       {
         // Fire a projectile if allowed to shoot
-        projectiles.push(
+        projectilesRef.current.push(
           new Projectile({
             position: {
-              x: turret.position.x + Math.cos(turret.rotation) * 1,
-              y: turret.position.y + Math.sin(turret.rotation) * 1,
+              x: turretRef.current.position.x + Math.cos(turretRef.current.rotation) * 1,
+              y: turretRef.current.position.y + Math.sin(turretRef.current.rotation) * 1,
             },
             
             velocity: {
-              x: Math.cos(turret.rotation) * PROJECTILE_SPEED,
-              y: Math.sin(turret.rotation) * PROJECTILE_SPEED,
+              x: Math.cos(turretRef.current.rotation) * PROJECTILE_SPEED,
+              y: Math.sin(turretRef.current.rotation) * PROJECTILE_SPEED,
             }
           })
         )
 
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
-        reload.canShoot = false
-        reload.reloadStage = 1
+        reloadRef.current.canShoot = false
+        reloadRef.current.reloadStage = 1
       }
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+
+    // Listen for IPC messages to toggle pause
+    ipcRenderer.on('toggle-pause', () => {
+      togglePause();
     });
 
-    // Cleanup mouse event listener
+    // Function to toggle pause state
+    const togglePause = () => {
+      setPaused((prevPaused) => !prevPaused);
+
+      if (!pausedRef.current) {
+        // If pausing, reset keys
+        const keys = keysRef.current;
+        keys.w.pressed = false;
+        keys.s.pressed = false;
+        keys.a.pressed = false;
+        keys.d.pressed = false;
+        keys.space.pressed = false;
+      }
+    };
+
+    // Cleanup event listeners and cancel animation frame
     return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      ipcRenderer.removeAllListeners('toggle-pause');
+      window.cancelAnimationFrame(animationIdRef.current);
+    };
+  }, []);
+
+  // Handle pause/unpause by stopping/resuming the game loop
+  useEffect(() => {
+    if (paused) {
+      // Additional logic if needed when the game is paused
+      // For example, you might want to show a pause menu or overlay
+    } else {
+      // Resume the game loop if needed
+      // However, since the game loop checks the 'paused' state,
+      // it will automatically resume updating when 'paused' is false
     }
-  }, [])
+  }, [paused]);
 
-  return <canvas ref={canvasRef} />;
+  // paused game menu
+  return (
+    <div style={{ position: 'relative' }}>
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
+      {paused && (
+        <div style={styles.overlay}>
+          <div style={styles.pauseText}>Game Paused</div>
+          <button style={styles.button} onClick={() => setPaused(false)}>Resume Game</button>
+        </div>
+      )}
+    </div>
+  );
+};
 
-}
+const styles = {
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  pauseText: {
+    color: 'white',
+    fontSize: '48px',
+    marginBottom: '20px',
+  },
+  button: {
+    padding: '10px 20px',
+    fontSize: '24px',
+    cursor: 'pointer',
+  },
+};
 
 export default App;
