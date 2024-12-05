@@ -14,7 +14,7 @@ const App = () => {
 
   // Lock flag for shooting
   // let canShoot = true
-  // let reloadStage = 0 // 0: not reloading, 1: open chamber, 2: load chamber
+  // let reloadStage = 0 // 0: loaded, 1: empty, 2: loading
 
   /*
   //enumerations object
@@ -32,8 +32,8 @@ const App = () => {
     const canvas = canvasRef.current
     const c = canvas.getContext('2d')
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas.width = window.innerWidth - 8
+    canvas.height = window.innerHeight - (window.innerHeight/12)
 
     //=======================
     // OBJECT DECLARATION
@@ -152,18 +152,16 @@ const App = () => {
 
       if (keys.space.pressed)
       {
-        if (reload.reloadStage === 1)
+        if (reload.reloadStage === 0)
         {
           // First spacebar press: Open the chamber
-          reload.reloadStage = 2        // Move to the next reload stage
+          reload.load_progress = 1     // Start reload progress bar
+          reload.reloadStage = 1       // Change from 0-empty to 1-loading
           keys.space.pressed = false    // Stop from holding space bar
         }
-
-        else if (reload.reloadStage === 2)
+        else if (reload.reloadStage === 1)
         {
-          reload.load_progress = 1      // Start load progress
-          //reload.reloadStage = 0        // Finalize reload
-          reload.canShoot = true
+          reload.reloadStage = 2        // Change from 1-loading to 2-loaded
           keys.space.pressed = false    // Stop from holding space bar
         }
       }
@@ -200,27 +198,30 @@ const App = () => {
     });
 
     window.addEventListener('mousedown', (event) => {
-      if (event.button === 0 && reload.canShoot) // Left mouse button clicked and can shoot
-      {
-        // Fire a projectile if allowed to shoot
-        projectiles.push(
-          new Projectile({
-            position: {
-              x: turret.position.x + Math.cos(turret.rotation) * 1,
-              y: turret.position.y + Math.sin(turret.rotation) * 1,
-            },
-            
-            velocity: {
-              x: Math.cos(turret.rotation) * PROJECTILE_SPEED,
-              y: Math.sin(turret.rotation) * PROJECTILE_SPEED,
-            }
-          })
-        )
-
-        // Lock shooting until the condition is met (e.g., projectile leaves the screen)
-        reload.canShoot = false
-        reload.reloadStage = 1
-      }
+      if (event.button === 0)
+        {
+          if (reload.canShoot) // Left mouse button clicked and can shoot
+          {
+            // Fire a projectile if allowed to shoot
+            projectiles.push(
+              new Projectile({
+                position: {
+                  x: turret.position.x + Math.cos(turret.rotation) * 1,
+                  y: turret.position.y + Math.sin(turret.rotation) * 1,
+                },
+                
+                velocity: {
+                  x: Math.cos(turret.rotation) * PROJECTILE_SPEED,
+                  y: Math.sin(turret.rotation) * PROJECTILE_SPEED,
+                }
+              })
+            )
+    
+            // Unload 
+            reload.canShoot = false
+            reload.reloadStage = 0
+          }
+        }
     });
 
     // Cleanup mouse event listener
