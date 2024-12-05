@@ -32,8 +32,8 @@ const App = () => {
     const canvas = canvasRef.current
     const c = canvas.getContext('2d')
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas.width = window.innerWidth - 8
+    canvas.height = window.innerHeight - (window.innerHeight/12)
 
     //=======================
     // OBJECT DECLARATION

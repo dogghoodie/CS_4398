@@ -5,9 +5,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #282c34;
+}
+
+canvas {
+  background-image: url(../public/plains.png); 
+  border: 4px solid #6272a4;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.buttons {
+  text-align: center;
+  margin-top: 8px;
 }
