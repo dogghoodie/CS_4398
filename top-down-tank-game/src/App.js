@@ -290,6 +290,10 @@ const App = () => {
     }
   }, [paused]);
 
+  const returnToMainMenu = () => {
+    ipcRenderer.send('navigate-to', 'menu');
+  };
+
   // paused game menu
   return (
     <div style={{ position: 'relative' }}>
@@ -298,6 +302,7 @@ const App = () => {
         <div style={styles.overlay}>
           <div style={styles.pauseText}>Game Paused</div>
           <button style={styles.button} onClick={() => setPaused(false)}>Resume Game</button>
+          <button style={styles.button} onClick={returnToMainMenu}>Main Menu</button>
         </div>
       )}
     </div>
@@ -324,9 +329,15 @@ const styles = {
     marginBottom: '20px',
   },
   button: {
-    padding: '10px 20px',
+    padding: '12px 24px',
     fontSize: '24px',
+    backgroundColor: '#50fa7b',
+    border: 'none',
+    borderRadius: '8px',
     cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+    margin: '10px',
   },
 };
 

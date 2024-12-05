@@ -1,27 +1,24 @@
-/* Reset default margins and paddings */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Body Styling */
 body, html {
   width: 100%;
   height: 100%;
-  background-color: #181b20; /* Match the game's background color */
+  background-color: #181b20;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: white;
 }
 
-/* Overlay Container */
 #leaderboard-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0); /* Semi-transparent dark background */
+  background-color: rgba(0, 0, 0, 0);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -29,7 +26,6 @@ body, html {
   z-index: 10;
 }
 
-/* Leaderboard Title */
 #leaderboard-title {
   font-size: 48px;
   margin-bottom: 30px;
@@ -37,7 +33,6 @@ body, html {
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Leaderboard Table */
 #leaderboard-table {
   width: 60%;
   border-collapse: collapse;
@@ -60,7 +55,6 @@ body, html {
   font-size: 20px;
 }
 
-/* Back Button Styling */
 #Back {
   padding: 12px 24px;
   font-size: 24px;
@@ -72,11 +66,6 @@ body, html {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-#Back:hover {
-  background-color: #40e06a;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
   #leaderboard-table {
     width: 90%;
