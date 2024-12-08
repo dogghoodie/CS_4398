@@ -9,6 +9,8 @@ document.getElementById('StartGame2')?.addEventListener('click', () => {
 });
 
 document.getElementById('Leaderboard')?.addEventListener('click', () => {
+  // This breaks the menu??? why??
+  // menuClickSound.play();
   ipcRenderer.send('navigate-to', 'leaderboard');
 });
 
