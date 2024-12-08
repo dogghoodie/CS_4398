@@ -4,6 +4,8 @@ import { Turret } from './turret.js';
 import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
+import { Enemy } from './enemy.js';
+
 const { ipcRenderer } = window.require('electron');
 
 const App = () => {
@@ -12,9 +14,10 @@ const App = () => {
 
   // Refs to store game objects persistently
   const playerRef = useRef(null);
-  const turretRef = useRef(null);
+  const player_turretRef = useRef(null);
   const reticleRef = useRef(null);
   const reloadRef = useRef(null);
+  const enemyRef = useRef(null);
   const projectilesRef = useRef([]);
   const animationIdRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -64,7 +67,7 @@ const App = () => {
       velocity: { x: 0, y: 0 },
     })
 
-    turretRef.current = new Turret({
+    player_turretRef.current = new Turret({
       position: {
         x: playerRef.current.position.x + 50,  // 50px to the right of the player
         y: playerRef.current.position.y,  // same vertical position as player
@@ -79,6 +82,13 @@ const App = () => {
     })
 
     reloadRef.current = new Reload({
+      position: {
+        x: mouseRef.current.x,
+        y: mouseRef.current.y,
+      }
+    })
+
+    enemyRef.current = new Enemy({
       position: {
         x: mouseRef.current.x,
         y: mouseRef.current.y,
@@ -120,7 +130,7 @@ const App = () => {
 
       // Object Animations
       playerRef.current.update(c)
-      turretRef.current.update(c, playerRef.current.position, mouseRef.current)
+      player_turretRef.current.update(c, playerRef.current.position, mouseRef.current)
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
 
@@ -137,6 +147,8 @@ const App = () => {
         }
       }
 
+      
+
       // Handle movement based on key presses
       const keys = keysRef.current;
       playerRef.current.velocity.x = 0
@@ -149,7 +161,9 @@ const App = () => {
       {
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
-      } else {
+      }
+      else
+      {
         playerRef.current.velocity.x *= FRICTION
         playerRef.current.velocity.y *= FRICTION
       }
@@ -243,13 +257,13 @@ const App = () => {
         projectilesRef.current.push(
           new Projectile({
             position: {
-              x: turretRef.current.position.x + Math.cos(turretRef.current.rotation) * 1,
-              y: turretRef.current.position.y + Math.sin(turretRef.current.rotation) * 1,
+              x: player_turretRef.current.position.x + Math.cos(player_turretRef.current.rotation) * 1,
+              y: player_turretRef.current.position.y + Math.sin(player_turretRef.current.rotation) * 1,
             },
             
             velocity: {
-              x: Math.cos(turretRef.current.rotation) * PROJECTILE_SPEED,
-              y: Math.sin(turretRef.current.rotation) * PROJECTILE_SPEED,
+              x: Math.cos(player_turretRef.current.rotation) * PROJECTILE_SPEED,
+              y: Math.sin(player_turretRef.current.rotation) * PROJECTILE_SPEED,
             }
           })
         )

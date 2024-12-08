@@ -31,4 +31,4 @@ export class Turret
       this.rotation = angleToMouse // Update turret rotation based on mouse position
       this.draw(c) // Draw the turret after updating
     }
-}  
+}
