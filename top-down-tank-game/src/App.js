@@ -5,6 +5,9 @@ import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { Enemy } from './enemy.js';
+import { menuMusic, menuClickSound } from './audio.js';
+import { engineSound, tireSound } from './audio.js';
+import { fireSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -30,8 +33,8 @@ const App = () => {
     escape: { pressed: false },
   });
   const pausedRef = useRef(paused);
-  const scoreRef = useRef(0); 
-  const scoreIntervalRef = useRef(null); 
+  const scoreRef = useRef(0);
+  const scoreIntervalRef = useRef(null);
 
   // Lock flag for shooting
   // let canShoot = true
@@ -105,7 +108,7 @@ const App = () => {
         y: event.clientY,
       }
     }
-    window.addEventListener('mousemove', handleMouseMove)    
+    window.addEventListener('mousemove', handleMouseMove)
 
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
@@ -117,7 +120,7 @@ const App = () => {
     //=======================
     let animationId;
 
-    const  animate = () => {
+    const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
       if (paused) {
@@ -141,13 +144,12 @@ const App = () => {
 
         // Remove projectiles that are off-screen
         if (projectile.position.x + 10 < 0 || projectile.position.x - 10 > canvas.width ||
-            projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height)
-        {
+          projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height) {
           projectiles.splice(i, 1)
         }
       }
 
-      
+
 
       // Handle movement based on key presses
       const keys = keysRef.current;
@@ -157,19 +159,16 @@ const App = () => {
       //=======================
       // USER INPUT
       //=======================
-      if (keys.w.pressed)
-      {
+      if (keys.w.pressed) {
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
       }
-      else
-      {
+      else {
         playerRef.current.velocity.x *= FRICTION
         playerRef.current.velocity.y *= FRICTION
       }
 
-      if (keys.s.pressed)
-      {
+      if (keys.s.pressed) {
         playerRef.current.velocity.x = -Math.cos(playerRef.current.rotation)
         playerRef.current.velocity.y = -Math.sin(playerRef.current.rotation)
       }
@@ -177,18 +176,18 @@ const App = () => {
       if (keys.d.pressed) playerRef.current.rotation += ROTATIONAL_SPEED
       if (keys.a.pressed) playerRef.current.rotation -= ROTATIONAL_SPEED
 
-      if (keys.space.pressed)
-      {
-        if (reloadRef.current.reloadStage === 0)
-        {
+      if (keys.space.pressed) {
+        if (reloadRef.current.reloadStage === 0) {
           // First spacebar press: Open the chamber
+          reload0Sound.play();
           reloadRef.current.load_progress = 1     // Start reload progress bar
           reloadRef.current.reloadStage = 1       // Change from 0-empty to 1-loading
           keys.space.pressed = false    // Stop from holding space bar
         }
-        else if (reloadRef.current.reloadStage === 1)
-        {
+        else if (reloadRef.current.reloadStage === 1) {
+          reload1Sound.play();
           reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
+          reload2Sound.play();
           keys.space.pressed = false    // Stop from holding space bar
         }
       }
@@ -252,6 +251,7 @@ const App = () => {
       if (pausedRef.current) return;
       if (reloadRef.current.canShoot) // Left mouse button clicked and can shoot
       {
+        fireSound.play();
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
         projectilesRef.current.push(
@@ -260,7 +260,7 @@ const App = () => {
               x: player_turretRef.current.position.x + Math.cos(player_turretRef.current.rotation) * 1,
               y: player_turretRef.current.position.y + Math.sin(player_turretRef.current.rotation) * 1,
             },
-            
+
             velocity: {
               x: Math.cos(player_turretRef.current.rotation) * PROJECTILE_SPEED,
               y: Math.sin(player_turretRef.current.rotation) * PROJECTILE_SPEED,
@@ -304,6 +304,42 @@ const App = () => {
       window.removeEventListener('keyup', handleKeyUp);
       ipcRenderer.removeAllListeners('toggle-pause');
       window.cancelAnimationFrame(animationIdRef.current);
+    };
+  }, []);
+
+  // This can probably be moved somewhere better but
+  // I'm leaving it here for now.
+  useEffect(() => {
+    // Start playing the engine sound when the game starts
+    engineSound.play();
+
+    const updateEngineSound = () => {
+      const speed = Math.sqrt(
+        playerRef.current.velocity.x ** 2 + playerRef.current.velocity.y ** 2
+      );
+
+      const maxSpeed = 2.0;
+      const normalizedVolume = Math.min(speed / maxSpeed, 1); // Normalize speed to a 0-1 range
+
+      const minVolume = 0.1;
+      const maxVolume = 0.3;
+      const scalingFactor = 0.2; // Adjust this value for slower scaling 0.1-1
+      const finalVolume = minVolume + (Math.pow(normalizedVolume, scalingFactor) * (maxVolume - minVolume));
+
+      console.log('Speed:', speed, 'Final Volume:', finalVolume);
+      engineSound.volume(finalVolume);
+    };
+
+    // Attach update function to the animation frame loop
+    const animateEngineSound = () => {
+      updateEngineSound();
+      requestAnimationFrame(animateEngineSound);
+    };
+    animateEngineSound();
+
+    // Stop the engine sound when the game ends or unmount
+    return () => {
+      engineSound.stop();
     };
   }, []);
 
