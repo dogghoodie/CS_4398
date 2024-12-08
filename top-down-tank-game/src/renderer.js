@@ -1,4 +1,6 @@
 const { ipcRenderer } = require('electron');
+// This also breaks.
+// const { menuClickSound } = require('audio.js');
 
 document.getElementById('StartGame')?.addEventListener('click', () => {
   ipcRenderer.send('navigate-to', 'index');
