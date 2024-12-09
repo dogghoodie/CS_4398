@@ -27,7 +27,10 @@ export class Enemy extends Tank
         this.projectile = []
         this.projectile_speed = 50
 
-        this.turret_turn_speed = 2 //in degrees
+        this.distance_traveled = 0
+        this.milestone = 300
+
+
     }
 
     update(c, target)
@@ -40,6 +43,23 @@ export class Enemy extends Tank
         const rand_y = Math.floor(Math.random() * 101) - 100
 
         this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
+
+
+        //simple heuristic based on player's position
+        const distance_x = target.x - this.position.x
+        const distance_y = target.y - this.position.y
+        const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
+
+        //Normalize Direction Vector
+        const normal_direction = { x: dx / distance, y: dy / distance }
+
+        const random_factor = 0.2
+        normal_direction.x += (Math.random() - 0.5) * random_factor
+        normal_direction.y += (Math.random() - 0.5) * random_factor
+
+
+
+
 
         //projectile update
         for(let i = this.projectile.length - 1; i >= 0; i++)
@@ -79,5 +99,10 @@ export class Enemy extends Tank
                 image_source: './enemy_projectile.png',
             })
         )
+    }
+
+    search_routine(target)
+    {
+
     }
 }

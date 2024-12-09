@@ -104,20 +104,19 @@ const App = () => {
 
     function projectile_collision(target, projectile)
     {    
-      const distance_x = projectile.position.x - target.position.x;
-      const distance_y = projectile.position.y - target.position.y;
+      const distance_x = projectile.position.x - target.position.x
+      const distance_y = projectile.position.y - target.position.y
 
       // Collision check
-      const x_collision = Math.abs(distance_x) <= (projectile.width / 2 + target.width / 2);
-      const y_collision = Math.abs(distance_y) <= (projectile.height / 2 + target.height / 2);
+      const x_collision = Math.abs(distance_x) <= (projectile.width / 2 + target.width / 2)
+      const y_collision = Math.abs(distance_y) <= (projectile.height / 2 + target.height / 2)
   
       if (x_collision && y_collision)
       {
-        console.log('HIT!')
         return true
       }
 
-      return false;
+      return false
     }
   
 
@@ -159,7 +158,6 @@ const App = () => {
           
           if(projectile_collision(enemy, projectile))
           {
-            console.log.apply('Success!')
             enemyRef.current.splice(i,1)
             playerRef.current.projectile.splice(j,1)
           }
