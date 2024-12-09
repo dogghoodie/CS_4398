@@ -19,6 +19,7 @@ export class Player extends Tank
         this.turret = new Turret ({
             position: { x: position.x, y:position.y },
             image_source: './player_turret.png',
+            rotation_speed: .03,
             rotation_offset: 20,
             position_offset: {x: 2, y: 0},
         })

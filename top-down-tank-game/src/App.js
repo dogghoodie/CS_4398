@@ -104,6 +104,25 @@ const App = () => {
     //=======================
     let animationId;
 
+    function projectile_collision(projectile, target)
+    {
+      const distance_x = projectile.position.x - target.position.x
+      const distance_y = projectile.position.y = target.position.y
+      const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
+
+      if(distance <= (projectile.width / 2) + (target.width / 2))
+      {
+        return true
+      }
+
+      if(distance <= (projectile.height / 2) + (target.height / 2))
+      {
+        return true
+      }
+
+      return false
+    }
+
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
@@ -120,21 +139,23 @@ const App = () => {
       // Object Animations
       //=======================
 
-      // Player Animation
-      playerRef.current.update(c, mouseRef.current)
-
-      // enemy animations
+      
+      // Enemy Management
       const enemies = enemyRef.current
       for(let i = 0; i < number_of_enemies; i++)
       {
         const enemy = enemies[i]
         enemy.update(c, playerRef.current.position)       
       }
+        
+      // Player Management
+      playerRef.current.update(c, mouseRef.current)
 
-      // GUI animation
+      // GUI Management
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
-        
+
+      
       //=======================
       // USER INPUT
       //=======================

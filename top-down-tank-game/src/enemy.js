@@ -19,18 +19,27 @@ export class Enemy extends Tank
         this.turret = new Turret ({
             position: { x: position.x, y: position.y },
             image_source: 'enemy_turret.png',
+            rotation_speed: .009,
             rotation_offset: 29,
             position_offset: {x: -25, y: 0},
         })
 
         this.projectile = []
         this.projectile_speed = 50
+
+        this.turret_turn_speed = 2 //in degrees
     }
 
     update(c, target)
     {
         super.update(c)
-        this.turret.update(c, this.position, target)
+        
+        // create a pseudo AI for aiming
+        // generate 2 random numbers for the target offset
+        const rand_x = Math.floor(Math.random() * 101) - 100 
+        const rand_y = Math.floor(Math.random() * 101) - 100
+
+        this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
 
         //projectile update
         for(let i = this.projectile.length - 1; i >= 0; i++)
