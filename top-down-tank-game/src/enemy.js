@@ -51,7 +51,7 @@ export class Enemy extends Tank
         const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
 
         //Normalize Direction Vector
-        const normal_direction = { x: dx / distance, y: dy / distance }
+        const normal_direction = { x: distance_x / distance, y: distance_y / distance }
 
         const random_factor = 0.2
         normal_direction.x += (Math.random() - 0.5) * random_factor

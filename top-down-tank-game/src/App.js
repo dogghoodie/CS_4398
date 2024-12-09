@@ -160,6 +160,7 @@ const App = () => {
           {
             enemyRef.current.splice(i,1)
             playerRef.current.projectile.splice(j,1)
+            scoreRef.current += 100
           }
         }
       }
