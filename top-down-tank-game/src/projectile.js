@@ -1,9 +1,14 @@
 export class Projectile
 {
-    constructor({position, velocity})
+    constructor({position, velocity, image_source})
     {
         this.position = position
         this.velocity = velocity
+        
+        this.image = new Image()
+        this.image.src = image_source
+
+        this.projectile_speed = 250
     }
 
     draw(c)

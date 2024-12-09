@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
-import { Turret } from './turret.js';
 import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { Enemy } from './enemy.js';
+
 
 const { ipcRenderer } = window.require('electron');
 
@@ -14,11 +14,11 @@ const App = () => {
 
   // Refs to store game objects persistently
   const playerRef = useRef(null);
-  const player_turretRef = useRef(null);
   const reticleRef = useRef(null);
   const reloadRef = useRef(null);
-  const enemyRef = useRef(null);
-  const projectilesRef = useRef([]);
+  const enemyRef = useRef([]);
+
+  //const player_projectilesRef = useRef([]);
   const animationIdRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const keysRef = useRef({
@@ -29,23 +29,10 @@ const App = () => {
     space: { pressed: false },
     escape: { pressed: false },
   });
+
   const pausedRef = useRef(paused);
   const scoreRef = useRef(0); 
   const scoreIntervalRef = useRef(null); 
-
-  // Lock flag for shooting
-  // let canShoot = true
-  // let reloadStage = 0 // 0: loaded, 1: empty, 2: loading
-
-  /*
-  //enumerations object
-  const ReloadState = Object.freeze({
-    NOT_LOADED: 'not_loaded',
-    EJECTED: 'ejected',
-    RELOADING: 'reloading',
-    ACTIVE_RELOADING: 'active_reload',
-  })
-  */
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -67,13 +54,6 @@ const App = () => {
       velocity: { x: 0, y: 0 },
     })
 
-    player_turretRef.current = new Turret({
-      position: {
-        x: playerRef.current.position.x + 50,  // 50px to the right of the player
-        y: playerRef.current.position.y,  // same vertical position as player
-      },
-    });
-
     reticleRef.current = new Reticle({
       position: {
         x: mouseRef.current.x,
@@ -88,13 +68,22 @@ const App = () => {
       }
     })
 
-    enemyRef.current = new Enemy({
-      position: {
-        x: mouseRef.current.x,
-        y: mouseRef.current.y,
-      }
-    })
+    const number_of_enemies = 3
+    enemyRef.current = []
+    //enemy_turretRef.current = []
+    for(let i = 0; i < number_of_enemies; i++)
+    {
+      const rand_x = Math.random() * canvas.width
+      const rand_y = Math.random() * canvas.height
 
+      enemyRef.current.push(
+        new Enemy({
+          position: { x: rand_x, y: rand_y },
+          velocity: { x: 0, y: 0 },
+        })
+      )
+    }
+ 
     //=======================
     // LISTENERS
     //=======================
@@ -117,10 +106,11 @@ const App = () => {
     //=======================
     let animationId;
 
-    const  animate = () => {
+    const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
-      if (paused) {
+      if (paused)
+      {
         // If the game is paused, do not update the game state
         return;
       }
@@ -128,14 +118,10 @@ const App = () => {
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Object Animations
-      playerRef.current.update(c)
-      player_turretRef.current.update(c, playerRef.current.position, mouseRef.current)
-      reticleRef.current.update(c, mouseRef.current)
-      reloadRef.current.update(c, mouseRef.current)
-
-      const projectiles = projectilesRef.current;
-      for (let i = projectiles.length - 1; i >= 0; i--) {
+      
+      const projectiles = player_projectilesRef.current;
+      for (let i = projectiles.length - 1; i >= 0; i--)
+      {
         const projectile = projectiles[i]
         projectile.update(c)
 
@@ -147,8 +133,20 @@ const App = () => {
         }
       }
 
-      
-
+      // Object Animations
+      playerRef.current.update(c)
+      playerRef.current.turret.update(c, playerRef.current.position, mouseRef.current)
+      const enemies = enemyRef.current
+      for(let i = 0; i < number_of_enemies; i++)
+      {
+        const enemy = enemies[i]
+        enemy.update(c)
+        enemy.turret.update(c, enemy.position, playerRef.current.position)
+        
+      }
+      reticleRef.current.update(c, mouseRef.current)
+      reloadRef.current.update(c, mouseRef.current)
+        
       // Handle movement based on key presses
       const keys = keysRef.current;
       playerRef.current.velocity.x = 0
@@ -254,17 +252,19 @@ const App = () => {
       {
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
-        projectilesRef.current.push(
+        player_projectilesRef.current.push(
           new Projectile({
             position: {
-              x: player_turretRef.current.position.x + Math.cos(player_turretRef.current.rotation) * 1,
-              y: player_turretRef.current.position.y + Math.sin(player_turretRef.current.rotation) * 1,
+              x: playerRef.current.turret.position.x + Math.cos(playerRef.current.turret.rotation) * 1,
+              y: playerRef.current.turret.position.y + Math.sin(playerRef.current.turret.rotation) * 1,
             },
             
             velocity: {
-              x: Math.cos(player_turretRef.current.rotation) * PROJECTILE_SPEED,
-              y: Math.sin(player_turretRef.current.rotation) * PROJECTILE_SPEED,
-            }
+              x: Math.cos(playerRef.current.turret.rotation) * PROJECTILE_SPEED,
+              y: Math.sin(playerRef.current.turret.rotation) * PROJECTILE_SPEED,
+            },
+
+            image_source: 'projectile.png'
           })
         )
 
