@@ -13,7 +13,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'build', 'menu.html'));
   // mainWindow.webContents.openDevTools();
 }
 
@@ -26,14 +26,18 @@ app.whenReady().then(() => {
   });
 });
 
-
-// I know event is never read but keep
 ipcMain.on('navigate-to', (event, page) => {
   if (page === 'leaderboard') {
     mainWindow.loadFile(path.join(__dirname, 'build', 'leaderboard.html'));
-  } else if (page === 'index') {
+  } else if (page === 'index' || page === 'game') {
     mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
+  } else if (page === 'menu') {
+    mainWindow.loadFile(path.join(__dirname, 'build', 'menu.html'));
   }
+});
+
+ipcMain.on('toggle-pause', () => {
+  mainWindow.webContents.send('toggle-pause');
 });
 
 app.on('window-all-closed', () => {

@@ -1,14 +1,9 @@
 body {
-  background-color: #282a36;
+  background-color: #181b20;
   margin: 0;
   padding: 0;
   /*height: 100vh; */
   /* full window */
-
-}
-
-canvas {
-  border: 4px solid #6272a4;
 }
 
 .App {
@@ -27,7 +22,7 @@ canvas {
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #181b20;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
