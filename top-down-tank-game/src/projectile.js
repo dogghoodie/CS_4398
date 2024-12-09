@@ -7,8 +7,6 @@ export class Projectile
         
         this.image = new Image()
         this.image.src = image_source
-
-        this.projectile_speed = 250
     }
 
     draw(c)
@@ -19,8 +17,20 @@ export class Projectile
 
     update(c)
     {
-        this.draw(c)
+        this.draw(c)        
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
+
+        /*
+        // Remove projectiles that are off-screen
+        if (this.position.x + 10 < 0 ||
+            this.position.x - 10 > c.canvas.width ||
+            this.position.y + 10 < 0 ||
+            this.position.y - 10 > c.canvas.height)
+        {
+            this.splice(i, 1)
+        }
+        */
+
     }
 }

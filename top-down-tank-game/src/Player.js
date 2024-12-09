@@ -1,5 +1,6 @@
 import { Tank } from "./tank"
 import { Turret } from "./turret"
+import { Projectile } from "./projectile"
 
 export class Player extends Tank
 {
@@ -21,6 +22,50 @@ export class Player extends Tank
             rotation_offset: 20,
             position_offset: {x: 2, y: 0},
         })
+
+        this.projectile = []
+        this.projectile_speed = 250
     }
 
+    update(c, mouse)
+    {
+        super.update(c) //tank update
+        this.turret.update(c, this.position, mouse) //turret update
+        
+
+        //projectile update
+        for (let i = this.projectile.length - 1; i >= 0; i--)
+        {
+            //const projectile = projectiles[i]
+            this.projectile[i].update(c)
+  
+            // Remove projectiles that are off-screen
+            if (this.projectile[i].position.x + 10 < 0 ||
+              this.projectile[i].position.x - 10 > c.canvas.width ||
+              this.projectile[i].position.y + 10 < 0 ||
+              this.projectile[i].position.y - 10 > c.canvas.height)
+            {
+                this.projectile.splice(i, 1)
+            }
+        }
+    }
+
+    fireProjectile()
+    {
+        this.projectile.push(
+            new Projectile ({
+              position: {
+                x: this.turret.position.x + Math.cos(this.turret.rotation) * 1,
+                y: this.turret.position.y + Math.sin(this.turret.rotation) * 1,
+              },
+              
+              velocity: {
+                x: Math.cos(this.turret.rotation) * this.projectile_speed,
+                y: Math.sin(this.turret.rotation) * this.projectile_speed,
+              },
+  
+              image_source: 'player_projectile.png'
+            })
+        )
+    }
 }

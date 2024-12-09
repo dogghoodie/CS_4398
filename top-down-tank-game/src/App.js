@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
 import { Reticle } from './reticle.js';
-import { Projectile } from './projectile.js';
+//import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { Enemy } from './enemy.js';
 
@@ -17,7 +17,6 @@ const App = () => {
   const reticleRef = useRef(null);
   const reloadRef = useRef(null);
   const enemyRef = useRef([]);
-
   //const player_projectilesRef = useRef([]);
   const animationIdRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -70,7 +69,6 @@ const App = () => {
 
     const number_of_enemies = 3
     enemyRef.current = []
-    //enemy_turretRef.current = []
     for(let i = 0; i < number_of_enemies; i++)
     {
       const rand_x = Math.random() * canvas.width
@@ -99,7 +97,7 @@ const App = () => {
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
     const FRICTION = 0.01
-    const PROJECTILE_SPEED = 250
+    //const PROJECTILE_SPEED = 250
 
     //=======================
     // GAME LOOP
@@ -118,24 +116,9 @@ const App = () => {
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
 
-      
-      const projectiles = player_projectilesRef.current;
-      for (let i = projectiles.length - 1; i >= 0; i--)
-      {
-        const projectile = projectiles[i]
-        projectile.update(c)
-
-        // Remove projectiles that are off-screen
-        if (projectile.position.x + 10 < 0 || projectile.position.x - 10 > canvas.width ||
-            projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height)
-        {
-          projectiles.splice(i, 1)
-        }
-      }
-
       // Object Animations
-      playerRef.current.update(c)
-      playerRef.current.turret.update(c, playerRef.current.position, mouseRef.current)
+      playerRef.current.update(c, mouseRef.current)
+      //playerRef.current.turret.update(c, playerRef.current.position, mouseRef.current)
       const enemies = enemyRef.current
       for(let i = 0; i < number_of_enemies; i++)
       {
@@ -182,12 +165,12 @@ const App = () => {
           // First spacebar press: Open the chamber
           reloadRef.current.load_progress = 1     // Start reload progress bar
           reloadRef.current.reloadStage = 1       // Change from 0-empty to 1-loading
-          keys.space.pressed = false    // Stop from holding space bar
+          keys.space.pressed = false              // Stop from holding space bar
         }
         else if (reloadRef.current.reloadStage === 1)
         {
-          reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
-          keys.space.pressed = false    // Stop from holding space bar
+          reloadRef.current.reloadStage = 2       // Change from 1-loading to 2-loaded
+          keys.space.pressed = false              // Stop from holding space bar
         }
       }
 
@@ -217,7 +200,7 @@ const App = () => {
         togglePause();
         return;
       }
-      if (pausedRef.current) return; // Ignore other keys when paused
+      if (pausedRef.current) return;              // Ignore other keys when paused
       const keys = keysRef.current;
       switch (event.code) {
         case 'KeyW': keys.w.pressed = true; break;
@@ -231,7 +214,7 @@ const App = () => {
 
     const handleKeyUp = (event) => {
       if (event.code === 'Escape') return;
-      if (pausedRef.current) return; // Ignore other keys when paused
+      if (pausedRef.current) return;              // Ignore other keys when paused
       const keys = keysRef.current;
       switch (event.code) {
         case 'KeyW': keys.w.pressed = false; break;
@@ -248,26 +231,12 @@ const App = () => {
 
     const handleMouseDown = (event) => {
       if (pausedRef.current) return;
-      if (reloadRef.current.canShoot) // Left mouse button clicked and can shoot
+      if (reloadRef.current.canShoot)             // Left mouse button clicked and can shoot
       {
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
-        player_projectilesRef.current.push(
-          new Projectile({
-            position: {
-              x: playerRef.current.turret.position.x + Math.cos(playerRef.current.turret.rotation) * 1,
-              y: playerRef.current.turret.position.y + Math.sin(playerRef.current.turret.rotation) * 1,
-            },
-            
-            velocity: {
-              x: Math.cos(playerRef.current.turret.rotation) * PROJECTILE_SPEED,
-              y: Math.sin(playerRef.current.turret.rotation) * PROJECTILE_SPEED,
-            },
-
-            image_source: 'projectile.png'
-          })
-        )
-
+        playerRef.current.fireProjectile()
+      
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
         reloadRef.current.canShoot = false
         reloadRef.current.reloadStage = 0
