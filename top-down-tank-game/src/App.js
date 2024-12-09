@@ -5,7 +5,7 @@ import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { Enemy } from './enemy.js';
-import { menuMusic, menuClickSound } from './audio.js';
+import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
 import { fireSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
 
@@ -307,7 +307,21 @@ const App = () => {
     };
   }, []);
 
-  // This can probably be moved somewhere better but
+  // Game music settings.
+  // This can probably be moved somewhere better place ? idk
+  useEffect(() => {
+    gameMusic.play();
+    gameMusic.loop(true);
+    gameMusic.volume(0.3);
+
+    return () => {
+      gameMusic.stop();
+    };
+  }, []);
+
+
+  // This controls the engine sound for the tank.
+  // This can probably be moved somewhere better as well but
   // I'm leaving it here for now.
   useEffect(() => {
     // Start playing the engine sound when the game starts

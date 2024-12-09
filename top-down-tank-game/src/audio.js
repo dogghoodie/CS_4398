@@ -9,11 +9,18 @@ export const menuMusic = new Howl({
   volume: 1.0,
 })
 
-// Tried implementing this in renderer.js but it 
-// breaks the entire menu to call this dependecy in renderer.
+/* Tried implementing this in renderer.js but it 
+breaks the entire menu to call this dependecy in renderer.
 export const menuClickSound = new Howl({
   src: ['../public/audio/menuClick.mp3'],
   loop: false,
+  volume: 1.0,
+})
+*/
+
+export const gameMusic = new Howl({
+  src: ['../public/audio/gameMusic.mp3'],
+  loop: true,
   volume: 1.0,
 })
 
