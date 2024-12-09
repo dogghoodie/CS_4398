@@ -4,6 +4,10 @@ import { Enemy } from './enemy.js';
 import { Reticle } from './reticle.js';
 //import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
+import { Enemy } from './enemy.js';
+import { gameMusic } from './audio.js';
+import { engineSound, tireSound } from './audio.js';
+import { fireSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
 
 
 const { ipcRenderer } = window.require('electron');
@@ -29,8 +33,8 @@ const App = () => {
   });
 
   const pausedRef = useRef(paused);
-  const scoreRef = useRef(0); 
-  const scoreIntervalRef = useRef(null); 
+  const scoreRef = useRef(0);
+  const scoreIntervalRef = useRef(null);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -91,7 +95,7 @@ const App = () => {
         y: event.clientY,
       }
     }
-    window.addEventListener('mousemove', handleMouseMove)    
+    window.addEventListener('mousemove', handleMouseMove)
 
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
@@ -118,8 +122,7 @@ const App = () => {
 
       return false
     }
-  
-
+    
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
@@ -144,7 +147,17 @@ const App = () => {
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
       
-      
+      const projectiles = projectilesRef.current;
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i]
+        projectile.update(c)
+
+        // Remove projectiles that are off-screen
+        if (projectile.position.x + 10 < 0 || projectile.position.x - 10 > canvas.width ||
+          projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height) {
+          projectiles.splice(i, 1)
+        }
+      }
       
       // Enemy Management
       for(let i = enemyRef.current.length - 1; i >= 0; i--)
@@ -174,19 +187,22 @@ const App = () => {
       playerRef.current.velocity.x = 0
       playerRef.current.velocity.y = 0
 
+
+      //=======================
+      // USER INPUT
+      //=======================
       if (keys.w.pressed)
       {
+
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
       }
-      else
-      {
+      else {
         playerRef.current.velocity.x *= FRICTION
         playerRef.current.velocity.y *= FRICTION
       }
 
-      if (keys.s.pressed)
-      {
+      if (keys.s.pressed) {
         playerRef.current.velocity.x = -Math.cos(playerRef.current.rotation)
         playerRef.current.velocity.y = -Math.sin(playerRef.current.rotation)
       }
@@ -194,15 +210,21 @@ const App = () => {
       if (keys.d.pressed) playerRef.current.rotation += ROTATIONAL_SPEED
       if (keys.a.pressed) playerRef.current.rotation -= ROTATIONAL_SPEED
 
-      if (keys.space.pressed)
-      {
-        if (reloadRef.current.reloadStage === 0)
-        {
+      if (keys.space.pressed) {
+        if (reloadRef.current.reloadStage === 0) {
           // First spacebar press: Open the chamber
+          reload0Sound.play();
           reloadRef.current.load_progress = 1     // Start reload progress bar
           reloadRef.current.reloadStage = 1       // Change from 0-empty to 1-loading
           keys.space.pressed = false              // Stop from holding space bar
         }
+
+        else if (reloadRef.current.reloadStage === 1) {
+          reload1Sound.play();
+          reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
+          reload2Sound.play();
+          keys.space.pressed = false    // Stop from holding space bar
+          
         else if (reloadRef.current.reloadStage === 1)
         {
           reloadRef.current.reloadStage = 2       // Change from 1-loading to 2-loaded
@@ -269,10 +291,10 @@ const App = () => {
       if (pausedRef.current) return;
       if (reloadRef.current.canShoot)             // Left mouse button clicked and can shoot
       {
+        fireSound.play();
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
-        playerRef.current.fire_projectile()
-      
+        
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
         reloadRef.current.canShoot = false
         reloadRef.current.reloadStage = 0
@@ -309,6 +331,56 @@ const App = () => {
       window.removeEventListener('keyup', handleKeyUp);
       ipcRenderer.removeAllListeners('toggle-pause');
       window.cancelAnimationFrame(animationIdRef.current);
+    };
+  }, []);
+
+  // Game music settings.
+  // This can probably be moved somewhere better place ? idk
+  useEffect(() => {
+    gameMusic.play();
+    gameMusic.loop(true);
+    gameMusic.volume(0.3);
+
+    return () => {
+      gameMusic.stop();
+    };
+  }, []);
+
+
+  // This controls the engine sound for the tank.
+  // This can probably be moved somewhere better as well but
+  // I'm leaving it here for now.
+  useEffect(() => {
+    // Start playing the engine sound when the game starts
+    engineSound.play();
+
+    const updateEngineSound = () => {
+      const speed = Math.sqrt(
+        playerRef.current.velocity.x ** 2 + playerRef.current.velocity.y ** 2
+      );
+
+      const maxSpeed = 2.0;
+      const normalizedVolume = Math.min(speed / maxSpeed, 1); // Normalize speed to a 0-1 range
+
+      const minVolume = 0.1;
+      const maxVolume = 0.3;
+      const scalingFactor = 0.2; // Adjust this value for slower scaling 0.1-1
+      const finalVolume = minVolume + (Math.pow(normalizedVolume, scalingFactor) * (maxVolume - minVolume));
+
+      console.log('Speed:', speed, 'Final Volume:', finalVolume);
+      engineSound.volume(finalVolume);
+    };
+
+    // Attach update function to the animation frame loop
+    const animateEngineSound = () => {
+      updateEngineSound();
+      requestAnimationFrame(animateEngineSound);
+    };
+    animateEngineSound();
+
+    // Stop the engine sound when the game ends or unmount
+    return () => {
+      engineSound.stop();
     };
   }, []);
 
