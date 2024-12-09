@@ -20,8 +20,8 @@ export class Enemy extends Tank
             position: { x: position.x, y: position.y },
             image_source: 'enemy_turret.png',
             rotation_speed: .009,
-            rotation_offset: 29,
-            position_offset: {x: -25, y: 0},
+            rotation_offset: 16,
+            position_offset: {x: 2, y: 0},
         })
 
         this.projectile = []
@@ -29,6 +29,7 @@ export class Enemy extends Tank
 
         this.distance_traveled = 0
         this.milestone = 300
+        this.fire_cooldown = 0
 
 
     }
@@ -41,42 +42,85 @@ export class Enemy extends Tank
         // generate 2 random numbers for the target offset
         const rand_x = Math.floor(Math.random() * 101) - 100 
         const rand_y = Math.floor(Math.random() * 101) - 100
-
-        this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
-
-
-        //simple heuristic based on player's position
+        
+        
+        
+        const SEARCH_DISTANCE = 200
+        const SPEED = .875
+        const ROTATIONAL_SPEED = 0.04
+        const FIRE_RANGE = 250
+        const ALIGNMENT_THRESHOLD = 0.1
+        
+        // simple heuristic based on player's position
         const distance_x = target.x - this.position.x
         const distance_y = target.y - this.position.y
         const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
+        
+        if ( distance > SEARCH_DISTANCE )
+        {
+            //calculate rotation to face the player.
+            const target_rotation = Math.atan2(distance_y, distance_x);
+            
+            //adjust rotation to slowly face the player
+            const rotation_difference = target_rotation - this.rotation
+            this.rotation += Math.sign(rotation_difference) * ROTATIONAL_SPEED
+            
+            this.velocity.x = Math.cos(this.rotation) * SPEED
+            this.velocity.y = Math.sin(this.rotation) * SPEED
+        }
+        
+        else
+        {
+            this.velocity.x = Math.cos(this.rotation) * SPEED
+            this.velocity.y = Math.sin(this.rotation) * SPEED
+        }
+                
+        // update enemy position
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+        
+        this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
+        
+        //firing logic
+        if( distance <= FIRE_RANGE)
+        {
+            const turret_to_player = Math.atan2(distance_y, distance_x)
+            const aligned = Math.abs(this.turret.rotation - turret_to_player)
 
-        //Normalize Direction Vector
-        const normal_direction = { x: dx / distance, y: dy / distance }
+            //normalize the angle difference
+            const normalized_alignment = Math.min(aligned, Math.abs(2 * Math.PI - aligned))
 
-        const random_factor = 0.2
-        normal_direction.x += (Math.random() - 0.5) * random_factor
-        normal_direction.y += (Math.random() - 0.5) * random_factor
+            if ((this.fire_cooldown <= 0) && (normalized_alignment <= ALIGNMENT_THRESHOLD))
+            {
+                this.fire_projectile()
+                this.fire_cooldown = 60
+            }
+
+            else
+            {
+                this.fire_cooldown--
+            }
+        }
 
 
-
-
-
-        //projectile update
+        // projectile update
         for(let i = this.projectile.length - 1; i >= 0; i++)
         {
             this.projectile[i].update(c)
-
-            //Remove projectiles that are off-screen
+                
+            // Remove projectiles that are off-screen
             if (this.projectile[i].position.x + 10 < 0 ||
                 this.projectile[i].position.x - 10 > c.canvas.width ||
                 this.projectile[i].position.y + 10 < 0 ||
                 this.projectile[i].position.y - 10 > c.canvas.height)
-            {
-                this.projectile.splice(i,1)
-            }
+                {
+                    this.projectile.splice(i,1)
+                }
         }
-    }
 
+        
+    }
+            
     fire_projectile()
     {
         this.projectile.push(
@@ -99,10 +143,5 @@ export class Enemy extends Tank
                 image_source: './enemy_projectile.png',
             })
         )
-    }
-
-    search_routine(target)
-    {
-
     }
 }

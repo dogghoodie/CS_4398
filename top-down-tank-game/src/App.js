@@ -158,6 +158,7 @@ const App = () => {
           
           if(projectile_collision(enemy, projectile))
           {
+            scoreRef.current += 100
             enemyRef.current.splice(i,1)
             playerRef.current.projectile.splice(j,1)
           }
