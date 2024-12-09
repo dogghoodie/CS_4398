@@ -1,18 +1,29 @@
 export class Projectile
 {
-    constructor({position, velocity, image_source})
+    constructor({position, velocity, rotation, width, height, rotation_offset, position_offset, image_source})
     {
         this.position = position
         this.velocity = velocity
-        
+        this.rotation = rotation
+        this.width = width
+        this.height = height
+        this.rotation_offset = rotation_offset
+        this.position_offset = position_offset
         this.image = new Image()
         this.image.src = image_source
     }
 
     draw(c)
     {
+        /*
         c.fillStyle = 'lime';
         c.fillRect(this.position.x, this.position.y, 20, 20); // Draw the lime square (player)
+        */
+        c.save()
+        c.translate(this.position.x - this.position_offset.x, this.position.y - this.position_offset.y)
+        c.rotate(this.rotation)
+        c.drawImage(this.image, -this.rotation_offset, -this.height/2, this.width , this.height)
+        c.restore()
     }
 
     update(c)
@@ -20,17 +31,5 @@ export class Projectile
         this.draw(c)        
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
-
-        /*
-        // Remove projectiles that are off-screen
-        if (this.position.x + 10 < 0 ||
-            this.position.x - 10 > c.canvas.width ||
-            this.position.y + 10 < 0 ||
-            this.position.y - 10 > c.canvas.height)
-        {
-            this.splice(i, 1)
-        }
-        */
-
     }
 }

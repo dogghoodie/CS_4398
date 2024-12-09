@@ -24,7 +24,7 @@ export class Player extends Tank
         })
 
         this.projectile = []
-        this.projectile_speed = 250
+        this.projectile_speed = 100
     }
 
     update(c, mouse)
@@ -32,11 +32,9 @@ export class Player extends Tank
         super.update(c) //tank update
         this.turret.update(c, this.position, mouse) //turret update
         
-
         //projectile update
         for (let i = this.projectile.length - 1; i >= 0; i--)
         {
-            //const projectile = projectiles[i]
             this.projectile[i].update(c)
   
             // Remove projectiles that are off-screen
@@ -50,7 +48,7 @@ export class Player extends Tank
         }
     }
 
-    fireProjectile()
+    fire_projectile()
     {
         this.projectile.push(
             new Projectile ({
@@ -63,8 +61,13 @@ export class Player extends Tank
                 x: Math.cos(this.turret.rotation) * this.projectile_speed,
                 y: Math.sin(this.turret.rotation) * this.projectile_speed,
               },
-  
-              image_source: 'player_projectile.png'
+
+              rotation: this.turret.rotation,
+              width: 128,
+              height: 128,
+              rotation_offset: -50,
+              position_offset: {x: -5, y: 0},
+              image_source: './player_projectile.png',
             })
         )
     }

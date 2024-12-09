@@ -18,20 +18,20 @@ export class Turret
   draw(c)
   {
     c.save()
-    c.translate(this.position.x - this.position_offset.x , this.position.y - this.position_offset.y) // Center turret at player's position
-    c.rotate(this.rotation) // Rotate the turret to face the mouse (independently of player)
-    c.drawImage(this.image, -this.rotation_offset, -this.height / 2, this.width, this.height) //offset rotation on image by 20px
+    c.translate(this.position.x - this.position_offset.x , this.position.y - this.position_offset.y) // Center turret at tank's position
+    c.rotate(this.rotation) // Rotate the turret to face a direction
+    c.drawImage(this.image, -this.rotation_offset, -this.height / 2, this.width, this.height)
     c.restore()
   }
 
   // Update the turret's state
   update(c, position, mouse)
   {
-    this.position = position // Keep turret's position in sync with player
+    this.position = position // Keep turret's position
     
     // Calculate the angle to the mouse position
     const angleToMouse = Math.atan2(mouse.y - (position.y + 10), mouse.x - (position.x + 10))
-    this.rotation = angleToMouse // Update turret rotation based on mouse position
+    this.rotation = angleToMouse // Update turret rotation based on position
     this.draw(c) // Draw the turret after updating
   }
 }

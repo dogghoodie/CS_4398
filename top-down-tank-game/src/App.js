@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
+import { Enemy } from './enemy.js';
 import { Reticle } from './reticle.js';
 //import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
-import { Enemy } from './enemy.js';
 
 
 const { ipcRenderer } = window.require('electron');
@@ -116,28 +116,34 @@ const App = () => {
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
 
+      //=======================
       // Object Animations
+      //=======================
+
+      // Player Animation
       playerRef.current.update(c, mouseRef.current)
-      //playerRef.current.turret.update(c, playerRef.current.position, mouseRef.current)
+
+      // enemy animations
       const enemies = enemyRef.current
       for(let i = 0; i < number_of_enemies; i++)
       {
         const enemy = enemies[i]
-        enemy.update(c)
-        enemy.turret.update(c, enemy.position, playerRef.current.position)
-        
+        enemy.update(c, playerRef.current.position)       
       }
+
+      // GUI animation
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
         
+      //=======================
+      // USER INPUT
+      //=======================
+      
       // Handle movement based on key presses
       const keys = keysRef.current;
       playerRef.current.velocity.x = 0
       playerRef.current.velocity.y = 0
 
-      //=======================
-      // USER INPUT
-      //=======================
       if (keys.w.pressed)
       {
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
@@ -235,7 +241,7 @@ const App = () => {
       {
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
-        playerRef.current.fireProjectile()
+        playerRef.current.fire_projectile()
       
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
         reloadRef.current.canShoot = false
