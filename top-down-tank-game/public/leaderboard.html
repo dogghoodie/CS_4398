@@ -16,37 +16,56 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
-  <div id="leaderboard-overlay">
-    <div id="leaderboard-title">Leaderboard</div>
-    <table id="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Player</th>
-          <th>Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Alice</td>
-          <td>1500</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Bob</td>
-          <td>1400</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Charlie</td>
-          <td>1300</td>
-        </tr>
-      </tbody>
-    </table>
-    <button id="Back">Back</button>
+    <div id="leaderboard-overlay">
+      <h1 id="leaderboard-title">Leaderboard</h1>
+      <table id="leaderboard-table">
+          <thead>
+              <tr>
+                  <th>Rank</th>
+                  <th>Name</th>
+                  <th>Score</th>
+              </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+              <!-- Sample static data -->
+        
+          </tbody>
+      </table>
+      <button id="Back">Back</button>
+    </div>
   </div>
-  <script src="../src/renderer.js"></script>
+    <script>
+      const fetchScores = async () => {
+          try {
+              const response = await fetch('http://localhost:3001/api/getScores');
+              const data = await response.json();
+              const sortedScores = data.scores.sort((a, b) => b.score - a.score);
+              populateTable(sortedScores);
+          } catch (error) {
+              console.error('Error fetching scores:', error);
+          }
+      };
+
+      // Function to populate the table with scores
+      const populateTable = (scores) => {
+          const tbody = document.getElementById('leaderboard-body');
+          tbody.innerHTML = ''; // Clear existing content
+
+          scores.forEach((player, index) => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                  <td>${index + 1}</td>
+                  <td>${player.playerName}</td>
+                  <td>${player.score}</td>
+              `;
+              tbody.appendChild(row);
+          });
+      };
+
+      // Call the fetchScores function when the page loads
+      window.onload = fetchScores;
+    </script>
+    <script src="../src/renderer.js"></script>
 </body>
 
 </html>

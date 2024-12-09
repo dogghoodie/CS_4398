@@ -9,6 +9,9 @@ import { Enemy } from './enemy.js';
 const { ipcRenderer } = window.require('electron');
 
 const App = () => {
+
+  const API_URL = 'http://localhost:3001/api'
+
   const canvasRef = useRef(null); // Create a reference to the canvas
   const [paused, setPaused] = useState(false); // State to track if the game paused
 
@@ -319,7 +322,18 @@ const App = () => {
     }
   }, [paused]);
 
-  const returnToMainMenu = () => {
+  const returnToMainMenu = async() => {
+    await fetch(`${API_URL}/addScores`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerName: 'Alice',
+        score: scoreRef.current
+      })
+    });
+
     ipcRenderer.send('navigate-to', 'menu');
   };
 
