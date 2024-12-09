@@ -2,9 +2,8 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
 import { Enemy } from './enemy.js';
 import { Reticle } from './reticle.js';
-//import { Projectile } from './projectile.js';
+import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
-import { Enemy } from './enemy.js';
 import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
 import { fireSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
@@ -72,8 +71,7 @@ const App = () => {
 
     const number_of_enemies = 3
     enemyRef.current = []
-    for(let i = 0; i < number_of_enemies; i++)
-    {
+    for (let i = 0; i < number_of_enemies; i++) {
       const rand_x = Math.random() * canvas.width
       const rand_y = Math.random() * canvas.height
 
@@ -84,7 +82,7 @@ const App = () => {
         })
       )
     }
- 
+
     //=======================
     // LISTENERS
     //=======================
@@ -100,34 +98,31 @@ const App = () => {
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
     const FRICTION = 0.01
-    
+
     //=======================
     // GAME LOOP
     //=======================
     let animationId;
 
-    function projectile_collision(target, projectile)
-    {    
+    function projectile_collision(target, projectile) {
       const distance_x = projectile.position.x - target.position.x
       const distance_y = projectile.position.y - target.position.y
 
       // Collision check
       const x_collision = Math.abs(distance_x) <= (projectile.width / 2 + target.width / 2)
       const y_collision = Math.abs(distance_y) <= (projectile.height / 2 + target.height / 2)
-  
-      if (x_collision && y_collision)
-      {
+
+      if (x_collision && y_collision) {
         return true
       }
 
       return false
     }
-    
+
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
-      if (paused)
-      {
+      if (paused) {
         // If the game is paused, do not update the game state
         return;
       }
@@ -139,49 +134,35 @@ const App = () => {
       // Object Animations
       //=======================
 
-      
+
       // Player Management
       playerRef.current.update(c, mouseRef.current)
-      
+
       // GUI Management
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
-      
-      const projectiles = projectilesRef.current;
-      for (let i = projectiles.length - 1; i >= 0; i--) {
-        const projectile = projectiles[i]
-        projectile.update(c)
 
-        // Remove projectiles that are off-screen
-        if (projectile.position.x + 10 < 0 || projectile.position.x - 10 > canvas.width ||
-          projectile.position.y + 10 < 0 || projectile.position.y - 10 > canvas.height) {
-          projectiles.splice(i, 1)
-        }
-      }
-      
+
       // Enemy Management
-      for(let i = enemyRef.current.length - 1; i >= 0; i--)
-      {
+      for (let i = enemyRef.current.length - 1; i >= 0; i--) {
         const enemy = enemyRef.current[i]
-        enemy.update(c, playerRef.current.position)       
-        
-        for(let j = playerRef.current.projectile.length - 1; j >= 0; j--)
-        {
+        enemy.update(c, playerRef.current.position)
+
+        for (let j = playerRef.current.projectile.length - 1; j >= 0; j--) {
           const projectile = playerRef.current.projectile[j]
-          
-          if(projectile_collision(enemy, projectile))
-          {
-            enemyRef.current.splice(i,1)
-            playerRef.current.projectile.splice(j,1)
+
+          if (projectile_collision(enemy, projectile)) {
+            enemyRef.current.splice(i, 1)
+            playerRef.current.projectile.splice(j, 1)
             scoreRef.current += 100
           }
         }
       }
-                  
+
       //=======================
       // USER INPUT
       //=======================
-      
+
       // Handle movement based on key presses
       const keys = keysRef.current;
       playerRef.current.velocity.x = 0
@@ -191,8 +172,7 @@ const App = () => {
       //=======================
       // USER INPUT
       //=======================
-      if (keys.w.pressed)
-      {
+      if (keys.w.pressed) {
 
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
@@ -224,11 +204,6 @@ const App = () => {
           reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
           reload2Sound.play();
           keys.space.pressed = false    // Stop from holding space bar
-          
-        else if (reloadRef.current.reloadStage === 1)
-        {
-          reloadRef.current.reloadStage = 2       // Change from 1-loading to 2-loaded
-          keys.space.pressed = false              // Stop from holding space bar
         }
       }
 
@@ -294,7 +269,7 @@ const App = () => {
         fireSound.play();
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
-        
+
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
         reloadRef.current.canShoot = false
         reloadRef.current.reloadStage = 0
