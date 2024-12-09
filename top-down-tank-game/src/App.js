@@ -17,7 +17,6 @@ const App = () => {
   const reticleRef = useRef(null);
   const reloadRef = useRef(null);
   const enemyRef = useRef([]);
-  //const player_projectilesRef = useRef([]);
   const animationIdRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const keysRef = useRef({
@@ -97,31 +96,30 @@ const App = () => {
     const SPEED = 2.0
     const ROTATIONAL_SPEED = 0.03
     const FRICTION = 0.01
-    //const PROJECTILE_SPEED = 250
-
+    
     //=======================
     // GAME LOOP
     //=======================
     let animationId;
 
-    function projectile_collision(projectile, target)
-    {
-      const distance_x = projectile.position.x - target.position.x
-      const distance_y = projectile.position.y = target.position.y
-      const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
+    function projectile_collision(target, projectile)
+    {    
+      const distance_x = projectile.position.x - target.position.x;
+      const distance_y = projectile.position.y - target.position.y;
 
-      if(distance <= (projectile.width / 2) + (target.width / 2))
+      // Collision check
+      const x_collision = Math.abs(distance_x) <= (projectile.width / 2 + target.width / 2);
+      const y_collision = Math.abs(distance_y) <= (projectile.height / 2 + target.height / 2);
+  
+      if (x_collision && y_collision)
       {
+        console.log('HIT!')
         return true
       }
 
-      if(distance <= (projectile.height / 2) + (target.height / 2))
-      {
-        return true
-      }
-
-      return false
+      return false;
     }
+  
 
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
@@ -140,22 +138,34 @@ const App = () => {
       //=======================
 
       
-      // Enemy Management
-      const enemies = enemyRef.current
-      for(let i = 0; i < number_of_enemies; i++)
-      {
-        const enemy = enemies[i]
-        enemy.update(c, playerRef.current.position)       
-      }
-        
       // Player Management
       playerRef.current.update(c, mouseRef.current)
-
+      
       // GUI Management
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
-
       
+      
+      
+      // Enemy Management
+      for(let i = enemyRef.current.length - 1; i >= 0; i--)
+      {
+        const enemy = enemyRef.current[i]
+        enemy.update(c, playerRef.current.position)       
+        
+        for(let j = playerRef.current.projectile.length - 1; j >= 0; j--)
+        {
+          const projectile = playerRef.current.projectile[j]
+          
+          if(projectile_collision(enemy, projectile))
+          {
+            console.log.apply('Success!')
+            enemyRef.current.splice(i,1)
+            playerRef.current.projectile.splice(j,1)
+          }
+        }
+      }
+                  
       //=======================
       // USER INPUT
       //=======================

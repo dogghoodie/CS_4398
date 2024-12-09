@@ -25,7 +25,7 @@ export class Player extends Tank
         })
 
         this.projectile = []
-        this.projectile_speed = 100
+        this.projectile_speed = 75
     }
 
     update(c, mouse)
