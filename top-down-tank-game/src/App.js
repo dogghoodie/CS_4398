@@ -266,6 +266,7 @@ const App = () => {
       if (pausedRef.current) return;
       if (reloadRef.current.canShoot)             // Left mouse button clicked and can shoot
       {
+        playerRef.current.fire_projectile()
         fireSound.play();
         // Fire a projectile if allowed to shoot
         scoreRef.current += 10; // 10 points
