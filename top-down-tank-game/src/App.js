@@ -18,6 +18,7 @@ const App = () => {
 
   const canvasRef = useRef(null); // Create a reference to the canvas
   const [paused, setPaused] = useState(false); // State to track if the game paused
+  const [username, setUsername] = useState('(default)'); // State to track the username
 
   // Refs to store game objects persistently
   const playerRef = useRef(null);
@@ -340,6 +341,21 @@ const App = () => {
       }
     };
 
+    // IPC listener for username updates
+    ipcRenderer.on('username-updated', (event, newUsername) => {
+      setUsername(newUsername);
+      console.log(`Username updated to: ${newUsername}`);
+      // Optionally, display the username in the game UI
+    });
+
+    // Request the current username when the game starts
+    ipcRenderer.send('get-username');
+
+    ipcRenderer.on('current-username', (event, currentUsername) => {
+      setUsername(currentUsername);
+      console.log(`Current username: ${currentUsername}`);
+    });
+
     // Cleanup event listeners and cancel animation frame
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
@@ -347,6 +363,8 @@ const App = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       ipcRenderer.removeAllListeners('toggle-pause');
+      ipcRenderer.removeAllListeners('username-updated');
+      ipcRenderer.removeAllListeners('current-username');
       window.cancelAnimationFrame(animationIdRef.current);
     };
   }, []);
@@ -413,6 +431,9 @@ const App = () => {
     }
   }, [paused]);
 
+  const [isResumeHovered, setIsResumeHovered] = useState(false);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
+
   const returnToMainMenu = async() => {
     await fetch(`${API_URL}/addScores`, {
       method: "post",
@@ -420,7 +441,7 @@ const App = () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        playerName: 'Alice',
+        playerName: username,
         score: scoreRef.current
       })
     });
@@ -434,9 +455,21 @@ const App = () => {
       <canvas ref={canvasRef} style={{ display: 'block' }} />
       {paused && (
         <div style={styles.overlay}>
-          <div style={styles.pauseText}>Game Paused</div>
-          <button style={styles.button} onClick={() => setPaused(false)}>Resume Game</button>
-          <button style={styles.button} onClick={returnToMainMenu}>Main Menu</button>
+          <div style={styles.pauseTitle}>Game Paused</div>
+          <div style={styles.pauseSubtitle}>Username: {username}</div>
+          <div style={styles.pauseSubtitle}>Score: {scoreRef.current}</div>
+          <button
+            style={getButtonStyle(isResumeHovered)}
+            onClick={() => setPaused(false)}
+            onMouseEnter={() => setIsResumeHovered(true)}
+            onMouseLeave={() => setIsResumeHovered(false)}
+          >Resume Game</button>
+          <button
+            style={getButtonStyle(isMenuHovered)}
+            onClick={returnToMainMenu}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+          >Main Menu</button>
         </div>
       )}
     </div>
@@ -457,10 +490,15 @@ const styles = {
     alignItems: 'center',
     zIndex: 10,
   },
-  pauseText: {
+  pauseTitle: {
     color: 'white',
     fontSize: '48px',
-    marginBottom: '20px',
+    marginBottom: '12px',
+  },
+  pauseSubtitle: {
+    color: 'white',
+    fontSize: '24px',
+    marginBottom: '8px'
   },
   button: {
     padding: '12px 24px',
@@ -474,5 +512,10 @@ const styles = {
     margin: '10px',
   },
 };
+
+const getButtonStyle = (isHovered) => ({
+  ...styles.button,
+  backgroundColor: isHovered ? '#40e06a' : styles.button.backgroundColor,
+});
 
 export default App;
