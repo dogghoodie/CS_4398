@@ -3,6 +3,7 @@ import { Player } from './player.js';
 import { Enemy } from './enemy.js';
 import { Reticle } from './reticle.js';
 import { Projectile } from './projectile.js';
+import { Explosion } from './explosion.js';
 import { Reload } from './reload.js';
 import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
@@ -31,6 +32,7 @@ const App = () => {
     escape: { pressed: false },
   });
 
+  const explosions = [];
   const pausedRef = useRef(paused);
   const scoreRef = useRef(0);
   const scoreIntervalRef = useRef(null);
@@ -119,6 +121,10 @@ const App = () => {
       return false
     }
 
+    const handleTankDeath = (tankPosition) => {
+      explosions.push(new Explosion({ position: tankPosition }));
+    };
+
     const isFarEnoughFromPlayer = (enemyPosition, playerPosition, minDistance) => {
       const distanceX = enemyPosition.x - playerPosition.x;
       const distanceY = enemyPosition.y - playerPosition.y;
@@ -148,6 +154,12 @@ const App = () => {
       reticleRef.current.update(c, mouseRef.current)
       reloadRef.current.update(c, mouseRef.current)
 
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        explosions[i].update(c);
+        if (explosions[i].finished) {
+          explosions.splice(i, 1); // Remove finished explosions
+        }
+      }
 
       // Enemy Management
       for (let i = enemyRef.current.length - 1; i >= 0; i--) {
@@ -159,6 +171,7 @@ const App = () => {
 
           if (projectile_collision(enemy, projectile)) {
             impactSound.play();
+            handleTankDeath(enemy.position); // Trigger explosion at the enemy's position
             enemyRef.current.splice(i, 1)
             playerRef.current.projectile.splice(j, 1)
             scoreRef.current += 100
@@ -173,7 +186,8 @@ const App = () => {
         do {
           rand_x = Math.random() * canvas.width;
           rand_y = Math.random() * canvas.height;
-        } while (!isFarEnoughFromPlayer({ x: rand_x, y: rand_y }, playerRef.current.position, respawnDistanceFromPlayer));
+        } while (!isFarEnoughFromPlayer({ x: rand_x, y: rand_y },
+          playerRef.current.position, respawnDistanceFromPlayer));
 
         enemyRef.current.push(
           new Enemy({
