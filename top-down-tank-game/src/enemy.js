@@ -23,12 +23,12 @@ export class Enemy extends Tank {
     })
 
     this.projectile = []
-    this.projectile_speed = 50
+    this.projectile_speed = 12
 
     this.distance_traveled = 0
     this.milestone = 300
 
-
+    this.fireCooldown = 0;
   }
 
   update(c, target) {
@@ -90,15 +90,17 @@ export class Enemy extends Tank {
 
 
     //projectile update
-    for (let i = this.projectile.length - 1; i >= 0; i++) {
-      this.projectile[i].update(c)
+    for (let i = this.projectile.length - 1; i >= 0; i--) {
+      this.projectile[i].update(c);
 
-      //Remove projectiles that are off-screen
-      if (this.projectile[i].position.x + 10 < 0 ||
+      // Remove projectiles that are off-screen
+      if (
+        this.projectile[i].position.x + 10 < 0 ||
         this.projectile[i].position.x - 10 > c.canvas.width ||
         this.projectile[i].position.y + 10 < 0 ||
-        this.projectile[i].position.y - 10 > c.canvas.height) {
-        this.projectile.splice(i, 1)
+        this.projectile[i].position.y - 10 > c.canvas.height
+      ) {
+        this.projectile.splice(i, 1);
       }
     }
   }

@@ -172,7 +172,7 @@ const App = () => {
           const distanceX = explosions[i].position.x - playerRef.current.position.x;
           const distanceY = explosions[i].position.y - playerRef.current.position.y;
           const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
-          const deathRadius = 80; // lethal distance
+          const deathRadius = 55; // lethal distance
     
           if (distance <= deathRadius) {
             explosions.push(new Explosion({ position: playerRef.current.position }));
@@ -199,7 +199,21 @@ const App = () => {
             scoreRef.current += 100
           }
         }
+
+        // Handle Enemy's Projectiles Collision with Player
+        for (let k = enemy.projectile.length - 1; k >= 0; k--) {
+          const enemyProjectile = enemy.projectile[k];
+    
+          // Check collision with Player
+          if (projectile_collision(playerRef.current, enemyProjectile)) {
+            impactSound.play();
+            enemy.projectile.splice(k, 1); // Remove the projectile
+            setDead(true);
+            break;
+          }
+        }
       }
+
       if (enemyRef.current.length < 3) {
         const canvas = canvasRef.current;
         const respawnDistanceFromPlayer = 200;
