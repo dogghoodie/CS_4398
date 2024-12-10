@@ -1,13 +1,13 @@
 
 const explosionFramePaths = [
-  './images/Explosion_A.png',
-  './images/Explosion_B.png',
-  './images/Explosion_C.png',
-  './images/Explosion_D.png',
-  './images/Explosion_E.png',
-  './images/Explosion_F.png',
-  './images/Explosion_G.png',
-  './images/Explosion_H.png',
+  './images/explosion/Explosion_A.png',
+  './images/explosion/Explosion_B.png',
+  './images/explosion/Explosion_C.png',
+  './images/explosion/Explosion_D.png',
+  './images/explosion/Explosion_E.png',
+  './images/explosion/Explosion_F.png',
+  './images/explosion/Explosion_G.png',
+  './images/explosion/Explosion_H.png',
 ];
 
 
