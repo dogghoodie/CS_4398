@@ -19,6 +19,11 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0);
+    background-image: url(../public/images/background/cannon.jpg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-blend-mode: lighten;
     display: flex;
     flex-direction: column;
     justify-content: center;
