@@ -6,7 +6,7 @@ import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
-import { fireSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
+import { fireSound, impactSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
 
 
 const { ipcRenderer } = window.require('electron');
@@ -152,6 +152,7 @@ const App = () => {
           const projectile = playerRef.current.projectile[j]
 
           if (projectile_collision(enemy, projectile)) {
+            impactSound.play();
             enemyRef.current.splice(i, 1)
             playerRef.current.projectile.splice(j, 1)
             scoreRef.current += 100
