@@ -39,7 +39,7 @@
       try {
         const response = await fetch('http://localhost:3001/api/getScores');
         const data = await response.json();
-        const sortedScores = data.scores.sort((a, b) => b.score - a.score);
+        const sortedScores = data.scores.sort((a, b) => b.score - a.score).slice(0, 10);
         populateTable(sortedScores);
       } catch (error) {
         console.error('Error fetching scores:', error);

@@ -455,7 +455,7 @@ const App = () => {
       <canvas ref={canvasRef} style={{ display: 'block' }} />
       {paused && (
         <div style={styles.overlay}>
-          <div style={styles.pauseTitle}>Game Paused</div>
+          <h1 style={styles.pauseTitle}>Game Paused</h1>
           <div style={styles.pauseSubtitle}>Username: {username}</div>
           <div style={styles.pauseSubtitle}>Score: {scoreRef.current}</div>
           <button
