@@ -24,7 +24,14 @@
     </div>
   </div>
 
-  <audio id="menuClickSound" src="audio/menuClick.mp3"></audio>
+  <script src="./audio-helper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      playAudio('menuMusic');
+    });
+  </script>
+
+
 
   <script src="../src/renderer.js"></script>
 </body>
