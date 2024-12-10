@@ -8,6 +8,7 @@ import { Reload } from './reload.js';
 import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
 import { fireSound, impactSound, reload0Sound, reload1Sound, reload2Sound } from './audio.js';
+import { projectile_collision } from './collision.js';
 
 
 const { ipcRenderer } = window.require('electron');
