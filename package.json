@@ -1,0 +1,10 @@
+{
+  "name": "tankgame",
+  "version": "0.1.0",
+  "description": "A top-down tank game with Electron and MongoDB.",
+  "authors": "Tanner M, Michael L, Walker K, Daniel M",
+  "license": "ISC",
+  "dependencies": {
+    "tankgame": "file:"
+  }
+}
