@@ -19,6 +19,7 @@ const App = () => {
   const canvasRef = useRef(null); // Create a reference to the canvas
   const [paused, setPaused] = useState(false); // State to track if the game paused
   const [username, setUsername] = useState('(default)'); // State to track the username
+  const [dead, setDead] = useState(false); // State to track if the player is dead
 
   // Refs to store game objects persistently
   const playerRef = useRef(null);
@@ -37,9 +38,14 @@ const App = () => {
   });
 
   const explosions = [];
+  const deadRef = useRef(dead);
   const pausedRef = useRef(paused);
   const scoreRef = useRef(0);
   const scoreIntervalRef = useRef(null);
+
+  useEffect(() => {
+    deadRef.current = dead;
+  }, [dead]);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -138,10 +144,9 @@ const App = () => {
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
-      if (paused) {
-        // If the game is paused, do not update the game state
-        return;
-      }
+      // If the game is paused, do not update the game state
+      if (deadRef.current) return;
+      if (pausedRef.current) return;
 
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
@@ -162,6 +167,19 @@ const App = () => {
         explosions[i].update(c);
         if (explosions[i].finished) {
           explosions.splice(i, 1); // Remove finished explosions
+        } else {
+          // Check collision with Player
+          const distanceX = explosions[i].position.x - playerRef.current.position.x;
+          const distanceY = explosions[i].position.y - playerRef.current.position.y;
+          const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+          const deathRadius = 80; // lethal distance
+    
+          if (distance <= deathRadius) {
+            explosions.push(new Explosion({ position: playerRef.current.position }));
+            setDead(true);
+            // Death sound here ??
+            break;
+          }
         }
       }
 
@@ -271,6 +289,7 @@ const App = () => {
     // KEY EVENT LISTNERS
     //=======================
     const handleKeyDown = (event) => {
+      if (deadRef.current) return;
       if (event.code === 'Escape') {
         togglePause();
         return;
@@ -288,6 +307,7 @@ const App = () => {
     };
 
     const handleKeyUp = (event) => {
+      if (deadRef.current) return;
       if (event.code === 'Escape') return;
       if (pausedRef.current) return;              // Ignore other keys when paused
       const keys = keysRef.current;
@@ -305,7 +325,7 @@ const App = () => {
     window.addEventListener('keyup', handleKeyUp);
 
     const handleMouseDown = (event) => {
-      if (pausedRef.current) return;
+      if (pausedRef.current || deadRef.current) return;
       if (reloadRef.current.canShoot)             // Left mouse button clicked and can shoot
       {
         playerRef.current.fire_projectile()
@@ -328,6 +348,7 @@ const App = () => {
 
     // Function to toggle pause state
     const togglePause = () => {
+      if (deadRef.current) return;
       setPaused((prevPaused) => !prevPaused);
 
       if (!pausedRef.current) {
@@ -472,6 +493,20 @@ const App = () => {
           >Main Menu</button>
         </div>
       )}
+
+      {dead && (
+        <div style={styles.overlay}>
+          <h1 style={styles.deathTitle}>You Died... GAME OVER!</h1>
+          <div style={styles.deathSubtitle}>Username: {username}</div>
+          <div style={styles.deathSubtitle}>Score: {scoreRef.current}</div>
+          <button
+            style={getButtonStyle(isMenuHovered)}
+            onClick={returnToMainMenu}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+          >Main Menu</button>
+        </div>
+      )}
     </div>
   );
 };
@@ -499,6 +534,16 @@ const styles = {
     color: 'white',
     fontSize: '24px',
     marginBottom: '8px'
+  },
+  deathTitle: {
+    color: 'red',
+    fontSize: '48px',
+    marginBottom: '12px',
+  },
+  deathSubtitle: {
+    color: 'white',
+    fontSize: '24px',
+    marginBottom: '8px',
   },
   button: {
     padding: '12px 24px',
