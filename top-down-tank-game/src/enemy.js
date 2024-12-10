@@ -25,10 +25,11 @@ export class Enemy extends Tank
         })
 
         this.projectile = []
-        this.projectile_speed = 50
+        this.projectile_speed = 10
 
         this.distance_traveled = 0
         this.milestone = 300
+        this.fireCooldown = 0
 
 
     }
@@ -44,25 +45,54 @@ export class Enemy extends Tank
 
         this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
 
-
-        //simple heuristic based on player's position
-        const distance_x = target.x - this.position.x
-        const distance_y = target.y - this.position.y
-        const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y)
-
-        //Normalize Direction Vector
-        const normal_direction = { x: distance_x / distance, y: distance_y / distance }
-
-        const random_factor = 0.2
-        normal_direction.x += (Math.random() - 0.5) * random_factor
-        normal_direction.y += (Math.random() - 0.5) * random_factor
-
-
-
-
+        const SEARCH_DISTANCE = 150;
+        const SPEED = 0.875;
+        const ROTATIONAL_SPEED = 0.04;
+        const FIRE_RANGE = 500;
+        const ALIGNMENT_THRESHOLD = 0.1;
+    
+        const distance_x = target.x - this.position.x;
+        const distance_y = target.y - this.position.y;
+        const distance = Math.sqrt(distance_x * distance_x + distance_y * distance_y);
+    
+        if (distance > SEARCH_DISTANCE)
+        {
+            const target_rotation = Math.atan2(distance_y, distance_x);
+            const rotation_difference = target_rotation - this.rotation;
+            this.rotation += Math.sign(rotation_difference) * ROTATIONAL_SPEED;
+    
+            this.velocity.x = Math.cos(this.rotation) * SPEED;
+            this.velocity.y = Math.sin(this.rotation) * SPEED;
+        }
+        
+        else
+        {
+            this.velocity.x = Math.cos(this.rotation) * SPEED;
+            this.velocity.y = Math.sin(this.rotation) * SPEED;
+        }
+    
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+        
+        if (distance <= FIRE_RANGE) {
+            const turret_to_player = Math.atan2(distance_y, distance_x)
+            const aligned = Math.abs(this.turret.rotation - turret_to_player)
+    
+            const normalized_alignment = Math.min(aligned, Math.abs(2 * Math.PI - aligned))
+    
+            if (this.fireCooldown <= 0 && normalized_alignment <= ALIGNMENT_THRESHOLD)
+            {
+                this.fire_projectile();
+                this.fireCooldown = 240; 
+            }
+            else
+            {
+                this.fireCooldown--;
+            }
+        }
 
         //projectile update
-        for(let i = this.projectile.length - 1; i >= 0; i++)
+        for(let i = this.projectile.length - 1; i >= 0; i--)
         {
             this.projectile[i].update(c)
 
@@ -99,10 +129,5 @@ export class Enemy extends Tank
                 image_source: './enemy_projectile.png',
             })
         )
-    }
-
-    search_routine(target)
-    {
-
     }
 }
