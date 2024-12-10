@@ -95,7 +95,7 @@ const App = () => {
     }
     window.addEventListener('mousemove', handleMouseMove)
 
-    const SPEED = 2.0
+    const SPEED = 3.0
     const ROTATIONAL_SPEED = 0.03
     const FRICTION = 0.01
 
@@ -119,6 +119,12 @@ const App = () => {
       return false
     }
 
+    const isFarEnoughFromPlayer = (enemyPosition, playerPosition, minDistance) => {
+      const distanceX = enemyPosition.x - playerPosition.x;
+      const distanceY = enemyPosition.y - playerPosition.y;
+      const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+      return distance >= minDistance;
+    };
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
@@ -161,8 +167,12 @@ const App = () => {
       }
       if (enemyRef.current.length < 3) {
         const canvas = canvasRef.current;
-        const rand_x = Math.random() * canvas.width;
-        const rand_y = Math.random() * canvas.height;
+        let rand_x, rand_y;
+
+        do {
+          rand_x = Math.random() * canvas.width;
+          rand_y = Math.random() * canvas.height;
+        } while (!isFarEnoughFromPlayer({ x: rand_x, y: rand_y }, playerRef.current.position, 100));
 
         enemyRef.current.push(
           new Enemy({
