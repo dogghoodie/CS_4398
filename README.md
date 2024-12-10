@@ -37,20 +37,17 @@ Before you can run the project, make sure you have the following installed:
 1. Clone the repository:
     ```bash
     git clone https://github.com/dogghoodie/CS_4398
-    cd top-down-tank-game
     ```
 
 2. Install dependencies:
     ```bash
-    npm install
+    npm run install-all
     ```
 
-3. Run the app in development mode:
+3. Run the application (start client and server concurrently):
     ```bash
-    npm start
+    npm run start
     ```
-
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ---
 
@@ -60,5 +57,6 @@ This project uses [Jest](https://jestjs.io/) and [React Testing Library](https:/
 
 To run tests:
 ```bash
-npm test
+npm run test
+```
 
