@@ -20,7 +20,7 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().lenght === 0) {
+    if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });

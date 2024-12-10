@@ -1,8 +1,7 @@
 {
-  "name": "tankgame-local",
-  "version": "0.1.0",
+  "name": "tankgame-client",
+  "version": "0.1.8",
   "authors": "Daniel M, Walker K, Tanner M, Michael L",
-  "license": "ISC",
   "main": "main.js",
   "homepage": "./",
   "private": true,
@@ -15,7 +14,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1",
-    "tankgame-local": "file:",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {

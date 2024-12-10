@@ -1,10 +1,18 @@
 {
   "name": "tankgame",
-  "version": "0.1.0",
+  "version": "0.1.8",
   "description": "A top-down tank game with Electron and MongoDB.",
-  "authors": "Tanner M, Michael L, Walker K, Daniel M",
-  "license": "ISC",
+  "authors": "Walker K, Daniel M, Tanner M, Michael L",
   "dependencies": {
-    "tankgame": "file:"
+    "howler": "^2.2.4"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npx nodemon server.js",
+    "client": "cd top-down-tank-game && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../top-down-tank-game && npm install"
   }
 }
