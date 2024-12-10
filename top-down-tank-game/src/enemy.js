@@ -25,10 +25,11 @@ export class Enemy extends Tank
         })
 
         this.projectile = []
-        this.projectile_speed = 50
+        this.projectile_speed = 10
 
         this.distance_traveled = 0
         this.milestone = 300
+        this.fireCooldown = 0
 
 
     }
@@ -44,11 +45,10 @@ export class Enemy extends Tank
 
         this.turret.update(c, this.position, {x: target.x + rand_x, y: target.y + rand_y})
 
-
-        const SEARCH_DISTANCE = 200;
+        const SEARCH_DISTANCE = 150;
         const SPEED = 0.875;
         const ROTATIONAL_SPEED = 0.04;
-        const FIRE_RANGE = 250;
+        const FIRE_RANGE = 500;
         const ALIGNMENT_THRESHOLD = 0.1;
     
         const distance_x = target.x - this.position.x;
@@ -82,9 +82,8 @@ export class Enemy extends Tank
     
             if (this.fireCooldown <= 0 && normalized_alignment <= ALIGNMENT_THRESHOLD)
             {
-                console.log("Firing at player!");
                 this.fire_projectile();
-                this.fireCooldown = 30; // Example cooldown
+                this.fireCooldown = 240; 
             }
             else
             {
@@ -92,12 +91,8 @@ export class Enemy extends Tank
             }
         }
 
-
-
-
-
         //projectile update
-        for(let i = this.projectile.length - 1; i >= 0; i++)
+        for(let i = this.projectile.length - 1; i >= 0; i--)
         {
             this.projectile[i].update(c)
 
@@ -134,10 +129,5 @@ export class Enemy extends Tank
                 image_source: './enemy_projectile.png',
             })
         )
-    }
-
-    search_routine(target)
-    {
-
     }
 }

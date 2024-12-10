@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Player } from './player.js';
 import { Enemy } from './enemy.js';
 import { Reticle } from './reticle.js';
-import { Projectile } from './projectile.js';
 import { Reload } from './reload.js';
 import { gameMusic } from './audio.js';
 import { engineSound, tireSound } from './audio.js';
@@ -10,6 +9,9 @@ import { fireSound, impactSound, reload0Sound, reload1Sound, reload2Sound } from
 
 
 const { ipcRenderer } = window.require('electron');
+
+
+
 
 const App = () => {
   const canvasRef = useRef(null); // Create a reference to the canvas
@@ -44,6 +46,9 @@ const App = () => {
     const canvas = canvasRef.current
     const c = canvas.getContext('2d')
 
+    const rand_x = Math.random() * canvas.width
+    const rand_y = Math.random() * canvas.height
+
     canvas.width = window.innerWidth - 8
     canvas.height = window.innerHeight - 8
 
@@ -68,13 +73,12 @@ const App = () => {
         y: mouseRef.current.y,
       }
     })
-
+        
     const number_of_enemies = 3
     enemyRef.current = []
-    for (let i = 0; i < number_of_enemies; i++) {
-      const rand_x = Math.random() * canvas.width
-      const rand_y = Math.random() * canvas.height
-
+    ///*
+    for (let i = 0; i < number_of_enemies; i++)
+    {
       enemyRef.current.push(
         new Enemy({
           position: { x: rand_x, y: rand_y },
@@ -82,6 +86,7 @@ const App = () => {
         })
       )
     }
+    //*/
 
     //=======================
     // LISTENERS
@@ -104,7 +109,8 @@ const App = () => {
     //=======================
     let animationId;
 
-    function projectile_collision(target, projectile) {
+    function projectile_collision(target, projectile)
+    {
       const distance_x = projectile.position.x - target.position.x
       const distance_y = projectile.position.y - target.position.y
 
@@ -143,21 +149,55 @@ const App = () => {
       reloadRef.current.update(c, mouseRef.current)
 
 
-      // Enemy Management
-      for (let i = enemyRef.current.length - 1; i >= 0; i--) {
+      // Projectile Management
+      for (let i = enemyRef.current.length - 1; i >= 0; i--)
+      {
         const enemy = enemyRef.current[i]
+        
+        //update the enemy
         enemy.update(c, playerRef.current.position)
+        
+        //enemy projectile collision with player tank
+        if (projectile_collision(playerRef.current, enemy.projectile[i]))
+        {
+          impactSound.play();
+          enemyRef.current.projectile.splice(i,1)
+          scoreRef -= 100
+        }
 
-        for (let j = playerRef.current.projectile.length - 1; j >= 0; j--) {
-          const projectile = playerRef.current.projectile[j]
 
-          if (projectile_collision(enemy, projectile)) {
+        for (let j = playerRef.current.projectile.length - 1; j >= 0; j--)
+        {
+          const player_projectile = playerRef.current.projectile[j]
+
+          //player projectile collision with enemy anks
+          if (projectile_collision(enemy, player_projectile))
+          {
             impactSound.play();
             enemyRef.current.splice(i, 1)
             playerRef.current.projectile.splice(j, 1)
             scoreRef.current += 100
-          }
+
+            //when one falls, another will take his place...
+            enemyRef.current.push(
+              new Enemy({
+                position: {x: rand_x, y: rand_y},
+                velocity: {x: 0, y: 0},
+              })
+            )
+          }    
         }
+      }
+
+      //if one does, another will take his place
+      if(enemyRef.current.length != 3)
+      {
+        enemyRef.current.push(
+          new Enemy({
+            position: { x: rand_x, y: rand_y },
+            velocity: { x: 0, y: 0 },
+          })
+        )
       }
 
       //=======================
@@ -173,17 +213,20 @@ const App = () => {
       //=======================
       // USER INPUT
       //=======================
-      if (keys.w.pressed) {
-
+      if (keys.w.pressed) //forwards movement
+      {
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
       }
-      else {
+
+      else
+      {
         playerRef.current.velocity.x *= FRICTION
         playerRef.current.velocity.y *= FRICTION
       }
 
-      if (keys.s.pressed) {
+      if (keys.s.pressed) //backwards movement
+      {
         playerRef.current.velocity.x = -Math.cos(playerRef.current.rotation)
         playerRef.current.velocity.y = -Math.sin(playerRef.current.rotation)
       }
@@ -191,8 +234,10 @@ const App = () => {
       if (keys.d.pressed) playerRef.current.rotation += ROTATIONAL_SPEED
       if (keys.a.pressed) playerRef.current.rotation -= ROTATIONAL_SPEED
 
-      if (keys.space.pressed) {
-        if (reloadRef.current.reloadStage === 0) {
+      if (keys.space.pressed)
+      {
+        if (reloadRef.current.reloadStage === 0)
+        {
           // First spacebar press: Open the chamber
           reload0Sound.play();
           reloadRef.current.load_progress = 1     // Start reload progress bar
@@ -200,7 +245,8 @@ const App = () => {
           keys.space.pressed = false              // Stop from holding space bar
         }
 
-        else if (reloadRef.current.reloadStage === 1) {
+        else if (reloadRef.current.reloadStage === 1)
+        {
           reload1Sound.play();
           reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
           reload2Sound.play();
