@@ -1,4 +1,8 @@
 {
+  "name": "tankgame-database",
+  "version": "0.1.8",
+  "author": "Michael L, Tanner M, Walker K, Daniel M",
+  "main": "App.js",
   "dependencies": {
     "axios": "^1.7.7",
     "body-parser": "^1.20.3",
@@ -8,13 +12,7 @@
     "mongoose": "^8.6.4",
     "nodemon": "^3.1.7"
   },
-  "name": "server",
-  "version": "1.0.0",
-  "description": "backend for tank game",
-  "main": "App.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Michael L",
-  "license": "ISC"
+  }
 }

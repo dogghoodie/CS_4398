@@ -1,10 +1,10 @@
+<p align="center">
+  <img src="./top-down-tank-game/public/logo512.png" alt="Item64 Icon" width="400"/>
+</p>
+
 # 🛡️ **Top Down Tank Game**
+The goal of this project is to create a fully-functional top-down tank game with intuitive controls, visually appealing interfaces and fun gameplay.
 
-## Overview
-The goal of this project is to create a fully-functional top-down tank game with intuitive controls, 
-visually appealing interfaces and fun gameplay.
-
----
 
 ## 🚀 **Features**
 - **XY-plane Navigation:** Move freely across a 2D plane.
@@ -12,8 +12,6 @@ visually appealing interfaces and fun gameplay.
 - **Inventory Management:** Collect and manage in-game items to aid in combat and exploration.
 - **Basic Enemies :** Enemies rush and attack the player!
 - **GUI Integration:** Intuitive user interfaces for to get straight into shooting tanks.
-
----
 
 ## 🛠️ **Tech Stack**
 - **Frontend:** [React](https://reactjs.org/)
@@ -24,10 +22,7 @@ visually appealing interfaces and fun gameplay.
 - **Build Tool:** React Scripts
 - **Additional Libraries:** TBD (Based on research for map persistence, AI, etc.)
 
----
-
 ## 🏗️ **Installation & Setup**
-
 ### Prerequisites
 Before you can run the project, make sure you have the following installed:
 - **Node.js** (v16.x or higher)
@@ -37,28 +32,24 @@ Before you can run the project, make sure you have the following installed:
 1. Clone the repository:
     ```bash
     git clone https://github.com/dogghoodie/CS_4398
-    cd top-down-tank-game
     ```
 
 2. Install dependencies:
     ```bash
-    npm install
+    npm run install-all
     ```
 
-3. Run the app in development mode:
+3. Run the application (start client and server concurrently):
     ```bash
-    npm start
+    npm run start
     ```
 
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
----
 
 ## 🧪 **Testing**
-
 This project uses [Jest](https://jestjs.io/) and [React Testing Library](https://testing-library.com/) for testing.
 
 To run tests:
 ```bash
-npm test
+npm run test
+```
 

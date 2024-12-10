@@ -6,15 +6,28 @@
   <link rel="icon" href="/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
-  <meta name="description" content="Top Down Tank Game" />
+  <meta name="description" content="Top Down Tank Game Set Username" />
   <link rel="apple-touch-icon" href="/logo192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <title>Tank Game Live</title>
+  <link rel="stylesheet" href="../src/changename.css" />
+  <title>Tank Game Username</title>
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  <div id="changename-overlay">
+    <h1 id="changename-title">Set Username</h1>
+
+    <form id="changename-form">
+      <input type="text" id="username-input" placeholder="Enter new username" required />
+      <button type="submit" id="submit-name">Submit</button>
+    </form>
+
+    <button id="Back">Back</button>
+  </div>
+  </div>
+
   <script src="../src/renderer.js"></script>
 </body>
 

@@ -12,12 +12,14 @@ import { fireSound, impactSound, reload0Sound, reload1Sound, reload2Sound } from
 
 const { ipcRenderer } = window.require('electron');
 
-
-
-
 const App = () => {
+
+  const API_URL = 'http://localhost:3001/api'
+
   const canvasRef = useRef(null); // Create a reference to the canvas
   const [paused, setPaused] = useState(false); // State to track if the game paused
+  const [username, setUsername] = useState('(default)'); // State to track the username
+  const [dead, setDead] = useState(false); // State to track if the player is dead
 
   // Refs to store game objects persistently
   const playerRef = useRef(null);
@@ -36,9 +38,14 @@ const App = () => {
   });
 
   const explosions = [];
+  const deadRef = useRef(dead);
   const pausedRef = useRef(paused);
   const scoreRef = useRef(0);
   const scoreIntervalRef = useRef(null);
+
+  useEffect(() => {
+    deadRef.current = dead;
+  }, [dead]);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -48,9 +55,6 @@ const App = () => {
   useEffect(() => {
     const canvas = canvasRef.current
     const c = canvas.getContext('2d')
-
-    const rand_x = Math.random() * canvas.width
-    const rand_y = Math.random() * canvas.height
 
     canvas.width = window.innerWidth - 8
     canvas.height = window.innerHeight - 8
@@ -76,12 +80,13 @@ const App = () => {
         y: mouseRef.current.y,
       }
     })
-        
+
     const number_of_enemies = 3
     enemyRef.current = []
-    ///*
-    for (let i = 0; i < number_of_enemies; i++)
-    {
+    for (let i = 0; i < number_of_enemies; i++) {
+      const rand_x = Math.random() * canvas.width
+      const rand_y = Math.random() * canvas.height
+
       enemyRef.current.push(
         new Enemy({
           position: { x: rand_x, y: rand_y },
@@ -89,7 +94,6 @@ const App = () => {
         })
       )
     }
-    //*/
 
     //=======================
     // LISTENERS
@@ -112,8 +116,7 @@ const App = () => {
     //=======================
     let animationId;
 
-    function projectile_collision(target, projectile)
-    {
+    function projectile_collision(target, projectile) {
       const distance_x = projectile.position.x - target.position.x
       const distance_y = projectile.position.y - target.position.y
 
@@ -141,10 +144,9 @@ const App = () => {
     const animate = () => {
       animationIdRef.current = window.requestAnimationFrame(animate);
 
-      if (paused) {
-        // If the game is paused, do not update the game state
-        return;
-      }
+      // If the game is paused, do not update the game state
+      if (deadRef.current) return;
+      if (pausedRef.current) return;
 
       // Clear the canvas on each frame to avoid drawing over the previous frames
       c.clearRect(0, 0, canvas.width, canvas.height)
@@ -165,49 +167,53 @@ const App = () => {
         explosions[i].update(c);
         if (explosions[i].finished) {
           explosions.splice(i, 1); // Remove finished explosions
+        } else {
+          // Check collision with Player
+          const distanceX = explosions[i].position.x - playerRef.current.position.x;
+          const distanceY = explosions[i].position.y - playerRef.current.position.y;
+          const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+          const deathRadius = 55; // lethal distance
+    
+          if (distance <= deathRadius) {
+            explosions.push(new Explosion({ position: playerRef.current.position }));
+            setDead(true);
+            // Death sound here ??
+            break;
+          }
         }
       }
 
-      // Projectile Management
-      for (let i = enemyRef.current.length - 1; i >= 0; i--)
-      {
+      // Enemy Management
+      for (let i = enemyRef.current.length - 1; i >= 0; i--) {
         const enemy = enemyRef.current[i]
-        
-        //update the enemy
         enemy.update(c, playerRef.current.position)
-        
-        //enemy projectile collision with player tank
-        if (projectile_collision(playerRef.current, enemy.projectile[i]))
-        {
-          impactSound.play();
-          enemyRef.current.projectile.splice(i,1)
-          scoreRef -= 100
-        }
 
+        for (let j = playerRef.current.projectile.length - 1; j >= 0; j--) {
+          const projectile = playerRef.current.projectile[j]
 
-        for (let j = playerRef.current.projectile.length - 1; j >= 0; j--)
-        {
-          const player_projectile = playerRef.current.projectile[j]
-
-          //player projectile collision with enemy anks
-          if (projectile_collision(enemy, player_projectile))
-          {
+          if (projectile_collision(enemy, projectile)) {
             impactSound.play();
             handleTankDeath(enemy.position); // Trigger explosion at the enemy's position
             enemyRef.current.splice(i, 1)
             playerRef.current.projectile.splice(j, 1)
             scoreRef.current += 100
+          }
+        }
 
-            //when one falls, another will take his place...
-            enemyRef.current.push(
-              new Enemy({
-                position: {x: rand_x, y: rand_y},
-                velocity: {x: 0, y: 0},
-              })
-            )
-          }    
+        // Handle Enemy's Projectiles Collision with Player
+        for (let k = enemy.projectile.length - 1; k >= 0; k--) {
+          const enemyProjectile = enemy.projectile[k];
+    
+          // Check collision with Player
+          if (projectile_collision(playerRef.current, enemyProjectile)) {
+            impactSound.play();
+            enemy.projectile.splice(k, 1); // Remove the projectile
+            setDead(true);
+            break;
+          }
         }
       }
+
       if (enemyRef.current.length < 3) {
         const canvas = canvasRef.current;
         const respawnDistanceFromPlayer = 200;
@@ -227,17 +233,6 @@ const App = () => {
         );
       }
 
-      //if one does, another will take his place
-      if(enemyRef.current.length != 3)
-      {
-        enemyRef.current.push(
-          new Enemy({
-            position: { x: rand_x, y: rand_y },
-            velocity: { x: 0, y: 0 },
-          })
-        )
-      }
-
       //=======================
       // USER INPUT
       //=======================
@@ -251,20 +246,17 @@ const App = () => {
       //=======================
       // USER INPUT
       //=======================
-      if (keys.w.pressed) //forwards movement
-      {
+      if (keys.w.pressed) {
+
         playerRef.current.velocity.x = Math.cos(playerRef.current.rotation) * SPEED
         playerRef.current.velocity.y = Math.sin(playerRef.current.rotation) * SPEED
       }
-
-      else
-      {
+      else {
         playerRef.current.velocity.x *= FRICTION
         playerRef.current.velocity.y *= FRICTION
       }
 
-      if (keys.s.pressed) //backwards movement
-      {
+      if (keys.s.pressed) {
         playerRef.current.velocity.x = -Math.cos(playerRef.current.rotation)
         playerRef.current.velocity.y = -Math.sin(playerRef.current.rotation)
       }
@@ -272,10 +264,8 @@ const App = () => {
       if (keys.d.pressed) playerRef.current.rotation += ROTATIONAL_SPEED
       if (keys.a.pressed) playerRef.current.rotation -= ROTATIONAL_SPEED
 
-      if (keys.space.pressed)
-      {
-        if (reloadRef.current.reloadStage === 0)
-        {
+      if (keys.space.pressed) {
+        if (reloadRef.current.reloadStage === 0) {
           // First spacebar press: Open the chamber
           reload0Sound.play();
           reloadRef.current.load_progress = 1     // Start reload progress bar
@@ -283,8 +273,7 @@ const App = () => {
           keys.space.pressed = false              // Stop from holding space bar
         }
 
-        else if (reloadRef.current.reloadStage === 1)
-        {
+        else if (reloadRef.current.reloadStage === 1) {
           reload1Sound.play();
           reloadRef.current.reloadStage = 2        // Change from 1-loading to 2-loaded
           reload2Sound.play();
@@ -314,6 +303,7 @@ const App = () => {
     // KEY EVENT LISTNERS
     //=======================
     const handleKeyDown = (event) => {
+      if (deadRef.current) return;
       if (event.code === 'Escape') {
         togglePause();
         return;
@@ -331,6 +321,7 @@ const App = () => {
     };
 
     const handleKeyUp = (event) => {
+      if (deadRef.current) return;
       if (event.code === 'Escape') return;
       if (pausedRef.current) return;              // Ignore other keys when paused
       const keys = keysRef.current;
@@ -348,7 +339,7 @@ const App = () => {
     window.addEventListener('keyup', handleKeyUp);
 
     const handleMouseDown = (event) => {
-      if (pausedRef.current) return;
+      if (pausedRef.current || deadRef.current) return;
       if (reloadRef.current.canShoot)             // Left mouse button clicked and can shoot
       {
         playerRef.current.fire_projectile()
@@ -371,6 +362,7 @@ const App = () => {
 
     // Function to toggle pause state
     const togglePause = () => {
+      if (deadRef.current) return;
       setPaused((prevPaused) => !prevPaused);
 
       if (!pausedRef.current) {
@@ -384,6 +376,21 @@ const App = () => {
       }
     };
 
+    // IPC listener for username updates
+    ipcRenderer.on('username-updated', (event, newUsername) => {
+      setUsername(newUsername);
+      console.log(`Username updated to: ${newUsername}`);
+      // Optionally, display the username in the game UI
+    });
+
+    // Request the current username when the game starts
+    ipcRenderer.send('get-username');
+
+    ipcRenderer.on('current-username', (event, currentUsername) => {
+      setUsername(currentUsername);
+      console.log(`Current username: ${currentUsername}`);
+    });
+
     // Cleanup event listeners and cancel animation frame
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
@@ -391,6 +398,8 @@ const App = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       ipcRenderer.removeAllListeners('toggle-pause');
+      ipcRenderer.removeAllListeners('username-updated');
+      ipcRenderer.removeAllListeners('current-username');
       window.cancelAnimationFrame(animationIdRef.current);
     };
   }, []);
@@ -457,7 +466,21 @@ const App = () => {
     }
   }, [paused]);
 
-  const returnToMainMenu = () => {
+  const [isResumeHovered, setIsResumeHovered] = useState(false);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
+
+  const returnToMainMenu = async() => {
+    await fetch(`${API_URL}/addScores`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerName: username,
+        score: scoreRef.current
+      })
+    });
+
     ipcRenderer.send('navigate-to', 'menu');
   };
 
@@ -467,9 +490,35 @@ const App = () => {
       <canvas ref={canvasRef} style={{ display: 'block' }} />
       {paused && (
         <div style={styles.overlay}>
-          <div style={styles.pauseText}>Game Paused</div>
-          <button style={styles.button} onClick={() => setPaused(false)}>Resume Game</button>
-          <button style={styles.button} onClick={returnToMainMenu}>Main Menu</button>
+          <h1 style={styles.pauseTitle}>Game Paused</h1>
+          <div style={styles.pauseSubtitle}>Username: {username}</div>
+          <div style={styles.pauseSubtitle}>Score: {scoreRef.current}</div>
+          <button
+            style={getButtonStyle(isResumeHovered)}
+            onClick={() => setPaused(false)}
+            onMouseEnter={() => setIsResumeHovered(true)}
+            onMouseLeave={() => setIsResumeHovered(false)}
+          >Resume Game</button>
+          <button
+            style={getButtonStyle(isMenuHovered)}
+            onClick={returnToMainMenu}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+          >Main Menu</button>
+        </div>
+      )}
+
+      {dead && (
+        <div style={styles.overlay}>
+          <h1 style={styles.deathTitle}>You Died... GAME OVER!</h1>
+          <div style={styles.deathSubtitle}>Username: {username}</div>
+          <div style={styles.deathSubtitle}>Score: {scoreRef.current}</div>
+          <button
+            style={getButtonStyle(isMenuHovered)}
+            onClick={returnToMainMenu}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+          >Main Menu</button>
         </div>
       )}
     </div>
@@ -490,10 +539,25 @@ const styles = {
     alignItems: 'center',
     zIndex: 10,
   },
-  pauseText: {
+  pauseTitle: {
     color: 'white',
     fontSize: '48px',
-    marginBottom: '20px',
+    marginBottom: '12px',
+  },
+  pauseSubtitle: {
+    color: 'white',
+    fontSize: '24px',
+    marginBottom: '8px'
+  },
+  deathTitle: {
+    color: 'red',
+    fontSize: '48px',
+    marginBottom: '12px',
+  },
+  deathSubtitle: {
+    color: 'white',
+    fontSize: '24px',
+    marginBottom: '8px',
   },
   button: {
     padding: '12px 24px',
@@ -507,5 +571,10 @@ const styles = {
     margin: '10px',
   },
 };
+
+const getButtonStyle = (isHovered) => ({
+  ...styles.button,
+  backgroundColor: isHovered ? '#40e06a' : styles.button.backgroundColor,
+});
 
 export default App;

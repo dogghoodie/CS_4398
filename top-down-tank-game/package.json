@@ -1,6 +1,8 @@
 {
-  "name": "top-down-tank-game",
-  "version": "0.1.0",
+  "name": "tankgame-client",
+  "version": "0.1.8",
+  "authors": "Daniel M, Walker K, Tanner M, Michael L",
+  "main": "main.js",
   "homepage": "./",
   "private": true,
   "dependencies": {
@@ -14,7 +16,9 @@
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "main": "main.js",
+  "devDependencies": {
+    "electron": "^32.1.2"
+  },
   "scripts": {
     "start": "npm run build && electron .",
     "react": "react-scripts start",
@@ -39,8 +43,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "electron": "^32.1.2"
   }
 }

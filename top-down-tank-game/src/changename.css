@@ -12,7 +12,7 @@ body, html {
   color: white;
 }
 
-#leaderboard-overlay {
+#changename-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -31,33 +31,48 @@ body, html {
   z-index: 10;
 }
 
-#leaderboard-title {
+#changename-title {
   font-size: 48px;
   margin-bottom: 30px;
   text-align: center;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-#leaderboard-table {
-  width: 60%;
-  border-collapse: collapse;
-  margin-bottom: 40px;
+#changename-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-#leaderboard-table th, #leaderboard-table td {
-  border: 2px solid #6272a4;
+#username-input {
   padding: 12px 20px;
+  font-size: 24px;
+  border: 2px solid #6272a4;
+  border-radius: 8px;
+  width: 300px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-#leaderboard-table th {
-  background-color: #44475a;
-  font-size: 24px;
+#username-input:focus {
+  outline: none;
+  border-color: #50fa7b;
 }
 
-#leaderboard-table td {
-  background-color: #6272a4;
-  font-size: 20px;
+#submit-name {
+  padding: 12px 24px;
+  font-size: 24px;
+  background-color: #50fa7b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#submit-name:hover {
+  background-color: #40e06a;
 }
 
 #Back {
@@ -76,15 +91,21 @@ body, html {
 }
 
 @media (max-width: 768px) {
-  #leaderboard-table {
+  #changename-form {
     width: 90%;
   }
 
-  #leaderboard-title {
+  #changename-title {
     font-size: 36px;
   }
 
-  #Back {
+  #username-input {
+    font-size: 20px;
+    width: 250px;
+    padding: 10px 16px;
+  }
+
+  #submit-name, #Back {
     font-size: 20px;
     padding: 10px 20px;
   }

@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="icon" href="/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="Top Down Tank Game Leaderboard" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <link rel="apple-touch-icon" href="/logo192.png" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="stylesheet" href="../src/leaderboard.css" />
   <title>Tank Game Leaderboard</title>
 </head>
@@ -17,35 +17,62 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <div id="leaderboard-overlay">
-    <div id="leaderboard-title">Leaderboard</div>
+    <h1 id="leaderboard-title">Leaderboard</h1>
     <table id="leaderboard-table">
       <thead>
         <tr>
           <th>Rank</th>
-          <th>Player</th>
+          <th>Name</th>
           <th>Score</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Alice</td>
-          <td>1500</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Bob</td>
-          <td>1400</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Charlie</td>
-          <td>1300</td>
-        </tr>
+      <tbody id="leaderboard-body">
+        <!-- Sample static data -->
+
       </tbody>
     </table>
     <button id="Back">Back</button>
   </div>
+  </div>
+  <script>
+    const fetchScores = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/getScores');
+        const data = await response.json();
+        const sortedScores = data.scores.sort((a, b) => b.score - a.score).slice(0, 10);
+        populateTable(sortedScores);
+      } catch (error) {
+        console.error('Error fetching scores:', error);
+      }
+    };
+
+    // Function to populate the table with scores
+    const populateTable = (scores) => {
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = ''; // Clear existing content
+
+      scores.forEach((player, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+                  <td>${index + 1}</td>
+                  <td>${player.playerName}</td>
+                  <td>${player.score}</td>
+              `;
+        tbody.appendChild(row);
+      });
+    };
+
+    // Call the fetchScores function when the page loads
+    window.onload = fetchScores;
+  </script>
+
+  <script src="./leaderboard-helper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      playAudio('leaderboardMusic');
+    });
+  </script>
+
   <script src="../src/renderer.js"></script>
 </body>
 
