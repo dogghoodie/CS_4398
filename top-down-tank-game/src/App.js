@@ -167,12 +167,13 @@ const App = () => {
       }
       if (enemyRef.current.length < 3) {
         const canvas = canvasRef.current;
+        const respawnDistanceFromPlayer = 200;
         let rand_x, rand_y;
 
         do {
           rand_x = Math.random() * canvas.width;
           rand_y = Math.random() * canvas.height;
-        } while (!isFarEnoughFromPlayer({ x: rand_x, y: rand_y }, playerRef.current.position, 100));
+        } while (!isFarEnoughFromPlayer({ x: rand_x, y: rand_y }, playerRef.current.position, respawnDistanceFromPlayer));
 
         enemyRef.current.push(
           new Enemy({
