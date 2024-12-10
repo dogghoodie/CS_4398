@@ -159,6 +159,18 @@ const App = () => {
           }
         }
       }
+      if (enemyRef.current.length < 3) {
+        const canvas = canvasRef.current;
+        const rand_x = Math.random() * canvas.width;
+        const rand_y = Math.random() * canvas.height;
+
+        enemyRef.current.push(
+          new Enemy({
+            position: { x: rand_x, y: rand_y },
+            velocity: { x: 0, y: 0 },
+          })
+        );
+      }
 
       //=======================
       // USER INPUT
@@ -270,7 +282,7 @@ const App = () => {
         playerRef.current.fire_projectile()
         fireSound.play();
         // Fire a projectile if allowed to shoot
-        scoreRef.current += 10; // 10 points
+        // scoreRef.current += 10; // 10 points
 
         // Lock shooting until the condition is met (e.g., projectile leaves the screen)
         reloadRef.current.canShoot = false
