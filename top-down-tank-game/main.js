@@ -10,7 +10,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-    }
+    },
+    icon: __dirname + '/public/logo192.png'
   });
 
   mainWindow.loadFile(path.join(__dirname, 'build', 'menu.html'));
