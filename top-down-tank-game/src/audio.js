@@ -36,6 +36,12 @@ export const fireSound = new Howl({
   volume: 1.0,
 })
 
+export const impactSound = new Howl({
+  src: ['../public/audio/impact.mp3'],
+  loop: false,
+  volume: 1.0,
+})
+
 export const reload0Sound = new Howl({
   src: ['../public/audio/reload1.mp3'],
   loop: false,
