@@ -1,5 +1,5 @@
 const audioFiles = {
-  leaderboardMusic: './audio/leaderboardMusic.mp3',
+  leaderboardMusic: './audio/secondaryMenuMusic.mp3',
   clickSound: './audio/menuClick.mp3',
 };
 
