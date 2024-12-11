@@ -6,7 +6,9 @@ const audioFiles = {
 function playAudio(key) {
   const audio = new Audio(audioFiles[key]);
 
-  if (key === 'leaderboardMusic') {
+  audio.volume = 0.5;
+
+  if (key === 'secondaryMenuMusic') {
     audio.loop = true;
   }
   audio.play();
