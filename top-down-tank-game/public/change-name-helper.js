@@ -8,7 +8,7 @@ function playAudio(key) {
 
   audio.volume = 0.5;
 
-  if (key === 'secondaryMenuMusic') {
+  if (key === 'leaderboardMusic') {
     audio.loop = true;
   }
   audio.play();
